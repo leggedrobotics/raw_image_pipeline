@@ -1,0 +1,93 @@
+<launch>
+
+  <arg name="nppi_debayer_mode"                    default="NPPI_BAYER_GRBG"/>
+  <arg name="output_encoding"                      default="BGR"/>
+  <arg name="skip_number_of_images_for_slow_topic" default="5"/>
+  <arg name="white_balance_clipping_percentile"    default="0.2"/>
+  <arg name="gamma_correction_k"                   default="0.8"/>
+  <arg name="run_clahe"                            default="false"/>
+  <arg name="clahe_clip_limit"                     default="1.5"/>
+  <arg name="clahe_tiles_grid_size"                default="8"/>
+
+  <arg name="input_topic3"                         default="alphasense_driver_ros/cam3"/>
+  <arg name="output_topic3"                        default="alphasense_driver_ros/cam3/debayered"/>
+  <arg name="red_blue_swap_cam3"                   default="false"/>
+  <arg name="needs_rotation_cam3"                  default="true"/>
+
+  <arg name="input_topic4"                         default="alphasense_driver_ros/cam4"/>
+  <arg name="output_topic4"                        default="alphasense_driver_ros/cam4/debayered"/>
+  <arg name="red_blue_swap_cam4"                   default="false"/>
+  <arg name="needs_rotation_cam4"                  default="true"/>
+
+  <arg name="input_topic5"                         default="alphasense_driver_ros/cam5"/>
+  <arg name="output_topic5"                        default="alphasense_driver_ros/cam5/debayered"/>
+  <arg name="red_blue_swap_cam5"                   default="false"/>
+  <arg name="needs_rotation_cam5"                  default="false"/>
+
+  <arg name="input_topic6"                         default="alphasense_driver_ros/cam6"/>
+  <arg name="output_topic6"                        default="alphasense_driver_ros/cam6/debayered"/>
+  <arg name="red_blue_swap_cam6"                   default="false"/>
+  <arg name="needs_rotation_cam6"                  default="true"/>
+  
+
+  <node name="debayer_cuda_node_cam3" type="debayer_cuda_node" pkg="debayer_cuda" output="screen">
+    <param name="nppi_debayer_mode"                    value="$(arg nppi_debayer_mode)"/>
+    <param name="output_encoding"                      value="$(arg output_encoding)"/>
+    <param name="input_topic"                          value="$(arg input_topic3)"/>
+    <param name="output_topic"                         value="$(arg output_topic3)"/>
+    <param name="red_blue_swap"                        value="$(arg red_blue_swap_cam3)"/>
+    <param name="skip_number_of_images_for_slow_topic" value="$(arg skip_number_of_images_for_slow_topic)"/>
+    <param name="needs_rotation"                       value="$(arg needs_rotation_cam3)"/>
+    <param name="white_balance_clipping_percentile"    value="$(arg white_balance_clipping_percentile)"/>
+    <param name="gamma_correction_k"                   value="$(arg gamma_correction_k)"/>
+    <param name="run_clahe"                            value="$(arg run_clahe)"/>
+    <param name="clahe_clip_limit"                     value="$(arg clahe_clip_limit)"/>
+    <param name="clahe_tiles_grid_size"                value="$(arg clahe_tiles_grid_size)"/>
+  </node>
+
+  <node name="debayer_cuda_node_cam4" type="debayer_cuda_node" pkg="debayer_cuda" output="screen">
+    <param name="nppi_debayer_mode"                    value="$(arg nppi_debayer_mode)"/>
+    <param name="output_encoding"                      value="$(arg output_encoding)"/>
+    <param name="input_topic"                          value="$(arg input_topic4)"/>
+    <param name="output_topic"                         value="$(arg output_topic4)"/>
+    <param name="red_blue_swap"                        value="$(arg red_blue_swap_cam4)"/>
+    <param name="skip_number_of_images_for_slow_topic" value="$(arg skip_number_of_images_for_slow_topic)"/>
+    <param name="needs_rotation"                       value="$(arg needs_rotation_cam4)"/>
+    <param name="white_balance_clipping_percentile"    value="$(arg white_balance_clipping_percentile)"/>
+    <param name="gamma_correction_k"                   value="$(arg gamma_correction_k)"/>
+    <param name="run_clahe"                            value="$(arg run_clahe)"/>
+    <param name="clahe_clip_limit"                     value="$(arg clahe_clip_limit)"/>
+    <param name="clahe_tiles_grid_size"                value="$(arg clahe_tiles_grid_size)"/>
+  </node>
+
+  <node name="debayer_cuda_node_cam5" type="debayer_cuda_node" pkg="debayer_cuda" output="screen">
+    <param name="nppi_debayer_mode"                    value="$(arg nppi_debayer_mode)"/>
+    <param name="output_encoding"                      value="$(arg output_encoding)"/>
+    <param name="input_topic"                          value="$(arg input_topic5)"/>
+    <param name="output_topic"                         value="$(arg output_topic5)"/>
+    <param name="red_blue_swap"                        value="$(arg red_blue_swap_cam5)"/>
+    <param name="skip_number_of_images_for_slow_topic" value="$(arg skip_number_of_images_for_slow_topic)"/>
+    <param name="needs_rotation"                       value="$(arg needs_rotation_cam5)"/>
+    <param name="white_balance_clipping_percentile"    value="$(arg white_balance_clipping_percentile)"/>
+    <param name="gamma_correction_k"                   value="$(arg gamma_correction_k)"/>
+    <param name="run_clahe"                            value="$(arg run_clahe)"/>
+    <param name="clahe_clip_limit"                     value="$(arg clahe_clip_limit)"/>
+    <param name="clahe_tiles_grid_size"                value="$(arg clahe_tiles_grid_size)"/>
+  </node>
+
+  <node name="debayer_cuda_node_cam6" type="debayer_cuda_node" pkg="debayer_cuda" output="screen">
+    <param name="nppi_debayer_mode"                    value="$(arg nppi_debayer_mode)"/>
+    <param name="output_encoding"                      value="$(arg output_encoding)"/>
+    <param name="input_topic"                          value="$(arg input_topic6)"/>
+    <param name="output_topic"                         value="$(arg output_topic6)"/>
+    <param name="red_blue_swap"                        value="$(arg red_blue_swap_cam6)"/>
+    <param name="skip_number_of_images_for_slow_topic" value="$(arg skip_number_of_images_for_slow_topic)"/>
+    <param name="needs_rotation"                       value="$(arg needs_rotation_cam6)"/>
+    <param name="white_balance_clipping_percentile"    value="$(arg white_balance_clipping_percentile)"/>
+    <param name="gamma_correction_k"                   value="$(arg gamma_correction_k)"/>
+    <param name="run_clahe"                            value="$(arg run_clahe)"/>
+    <param name="clahe_clip_limit"                     value="$(arg clahe_clip_limit)"/>
+    <param name="clahe_tiles_grid_size"                value="$(arg clahe_tiles_grid_size)"/>
+  </node>
+
+</launch>
