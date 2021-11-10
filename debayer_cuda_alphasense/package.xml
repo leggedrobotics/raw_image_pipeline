@@ -16,6 +16,8 @@
   <depend>image_transport</depend>
   <depend>nodelet</depend>
   <depend>roscpp</depend>
+  <depend>nvidia-cuda</depend>
+  <depend>nvidia-cuda-dev</depend>
 
   <export>
     <nodelet plugin="${prefix}/nodelet_plugins.xml" />
