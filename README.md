@@ -14,7 +14,7 @@ This source code is released under a [proprietary license](LICENSE).
 
 ## Overview
 
-This repository provides helper packages for the 7sense Alphasense sensor on the ANYmal C100 robots.
+This repository provides util packages for the 7sense Alphasense sensor on the ANYmal C100 robots.
 
 ### Requirements
 
