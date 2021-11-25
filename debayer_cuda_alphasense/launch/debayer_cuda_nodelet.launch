@@ -32,7 +32,7 @@
 
   <node name="debayer_cuda_nodelet_manager" type="nodelet" pkg="nodelet" args="manager" output="screen"/>
 
-  <node name="debayer_cuda_nodelet_cam3" type="nodelet" pkg="nodelet" output="screen" args="load debayer_cuda_nodelet debayer_cuda_nodelet_manager">
+  <node name="debayer_cuda_nodelet_cam3" type="nodelet" pkg="nodelet" output="screen" args="load debayer_cuda_alphasense_nodelet debayer_cuda_alphasense_nodelet_manager">
     <param name="nppi_debayer_mode"                    value="$(arg nppi_debayer_mode)"/>
     <param name="output_encoding"                      value="$(arg output_encoding)"/>
     <param name="input_topic"                          value="$(arg input_topic3)"/>
@@ -47,7 +47,7 @@
     <param name="clahe_tiles_grid_size"                value="$(arg clahe_tiles_grid_size)"/>
   </node>
 
-  <node name="debayer_cuda_nodelet_cam4" type="nodelet" pkg="nodelet" output="screen" args="load debayer_cuda_nodelet debayer_cuda_nodelet_manager">
+  <node name="debayer_cuda_nodelet_cam4" type="nodelet" pkg="nodelet" output="screen" args="load debayer_cuda_alphasense_nodelet debayer_cuda_alphasense_nodelet_manager">
     <param name="nppi_debayer_mode"                    value="$(arg nppi_debayer_mode)"/>
     <param name="output_encoding"                      value="$(arg output_encoding)"/>
     <param name="input_topic"                          value="$(arg input_topic4)"/>
@@ -62,7 +62,7 @@
     <param name="clahe_tiles_grid_size"                value="$(arg clahe_tiles_grid_size)"/>
   </node>
 
-  <node name="debayer_cuda_nodelet_cam5" type="nodelet" pkg="nodelet" output="screen" args="load debayer_cuda_nodelet debayer_cuda_nodelet_manager">
+  <node name="debayer_cuda_nodelet_cam5" type="nodelet" pkg="nodelet" output="screen" args="load debayer_cuda_alphasense_nodelet debayer_cuda_alphasense_nodelet_manager">
     <param name="nppi_debayer_mode"                    value="$(arg nppi_debayer_mode)"/>
     <param name="output_encoding"                      value="$(arg output_encoding)"/>
     <param name="input_topic"                          value="$(arg input_topic5)"/>
@@ -77,7 +77,7 @@
     <param name="clahe_tiles_grid_size"                value="$(arg clahe_tiles_grid_size)"/>
   </node>
 
-  <node name="debayer_cuda_nodelet_cam6" type="nodelet" pkg="nodelet" output="screen" args="load debayer_cuda_nodelet debayer_cuda_nodelet_manager">
+  <node name="debayer_cuda_nodelet_cam6" type="nodelet" pkg="nodelet" output="screen" args="load debayer_cuda_alphasense_nodelet debayer_cuda_alphasense_nodelet_manager">
     <param name="nppi_debayer_mode"                    value="$(arg nppi_debayer_mode)"/>
     <param name="output_encoding"                      value="$(arg output_encoding)"/>
     <param name="input_topic"                          value="$(arg input_topic6)"/>
