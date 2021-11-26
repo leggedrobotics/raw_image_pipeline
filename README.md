@@ -22,6 +22,6 @@ This repository provides utility packages for the 7sense Alphasense sensor on th
 
 #### Requirements
 
-* For `debayer_cuda`: On Jetson Xavier systems that are set up with Jetpack version < 4.5.1, an additional installation setp is required to ensure that the correct version of xphoto from OpenCV is installed (In any setup the OpenCV version needs to be > 4.2.0). Follow the steps in the setup instructions to install the required version of xphoto from opencv locally. Note that this requires `LOCAL_OPENCV_INSTALL` to be set in order to provide the correct OpenCV path - [link](LINKAddedHereOnceMerged)
+* For `debayer_cuda`: On Jetson Xavier systems that are set up with Jetpack version < 4.5.1, an additional installation setp is required to ensure that the correct version of xphoto from OpenCV is installed (In any setup the OpenCV version needs to be > 4.2.0). Follow the steps in the setup instructions to install the required version of xphoto from opencv locally. Note that this requires `LOCAL_OPENCV_INSTALL` to be set in order to provide the correct OpenCV path - [link](https://bitbucket.org/leggedrobotics/alphasense_rsl/src/master/debayer_cuda/setup/setup_jetson_with_opencv_xphoto.md)
 
 
