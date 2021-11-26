@@ -1,9 +1,0 @@
-<library path="lib/libdebayer_cuda_alphasense_nodelet">
-
-  <!-- Image Debayering Plugin -->
-  <class name="debayer_cuda_alphasense_nodelet" type="DebayerCudaNodelet" base_class_type="nodelet::Nodelet">
-    <description>Cuda Debayering Nodelet.</description>
-  </class>
-
-</library> 
-

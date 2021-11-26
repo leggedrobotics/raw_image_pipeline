@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>debayer_cuda_alphasense</name>
+  <name>debayer_cuda</name>
   <version>0.0.0</version>
   <description>Debayering node for ANYmal C's Jetson</description>
 

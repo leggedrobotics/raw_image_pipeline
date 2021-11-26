@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(debayer_cuda_alphasense)
+project(debayer_cuda)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wextra -O3 -DNDEBUG")
