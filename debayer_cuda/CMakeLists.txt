@@ -4,7 +4,7 @@ project(debayer_cuda)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wextra -O3 -DNDEBUG")
 
-set(LOCAL_OPENCV_INSTALL false)
+set(LOCAL_OPENCV_INSTALL true)
 
 set(PACKAGE_DEPENDENCIES
   cv_bridge
