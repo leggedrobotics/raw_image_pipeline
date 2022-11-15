@@ -1,0 +1,4 @@
+opencv-python
+pytest
+numpy
+conan

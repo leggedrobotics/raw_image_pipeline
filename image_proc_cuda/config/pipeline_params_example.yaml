@@ -1,0 +1,39 @@
+# Pipeline options
+needs_rotation: false
+run_white_balance: true
+run_gamma_correction: true
+run_vignetting_correction: true
+run_clahe: false
+run_color_enhancer: false
+run_color_calibration: true
+run_undistortion: true
+
+# Debayer option
+debayer_option: "auto"
+
+# White balance
+white_balance_method: "ffcc"
+white_balance_clipping_percentile: 20
+white_balance_saturation_threshold: 0.8
+white_balance_temporal_consistency: true
+
+# Gamma correction
+gamma_correction_method: "custom"
+gamma_correction_k: 0.8
+
+# Vignetting correction
+vignetting_correction_scale: 1.5
+vignetting_correction_a2: 1e-3
+vignetting_correction_a4: 1e-6
+
+# CLAHE
+clahe_clip_limit: 1.5
+clahe_tiles_grid_size: 8
+
+# Color enhancer
+color_enhancer_value_gain: 1.0
+color_enhancer_saturation_gain: 1.5
+color_enhancer_hue_gain: 1.0
+
+# Color calibration
+color_calibration_matrix: [2.438429, 0.077131405, -0.20208795, -0.5693435, 1.9333502, -0.60181355, -0.3423824, -0.41744354, 2.2011373]

@@ -1,0 +1,9 @@
+<library path="lib/libimage_proc_cuda_ros_nodelet">
+
+  <!-- Image Debayering Plugin -->
+  <class name="image_proc_cuda_ros_nodelet" type="ImageProcCudaNodelet" base_class_type="nodelet::Nodelet">
+    <description>Image Proc Cuda Nodelet</description>
+  </class>
+
+</library> 
+

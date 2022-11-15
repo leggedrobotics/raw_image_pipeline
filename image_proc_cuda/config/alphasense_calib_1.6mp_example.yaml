@@ -1,0 +1,23 @@
+# Refer to this link: http://wiki.ros.org/camera_calibration_parsers for the format of this file.
+# Created date: Oct 15, 2019.
+image_width: 1440
+image_height: 1080
+camera_name: cam0_sensor_frame
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [699.2284099702, 0.0, 711.8009584441, 0.0, 698.546880367, 524.7993478318, 0.0, 0.0, 1.0]
+distortion_model: equidistant
+distortion_coefficients:
+  rows: 1
+  cols: 4
+  data: [-0.0480706813, 0.0129997684, -0.0112199955, 0.0026955514]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [699.2284099702, 0.0, 711.8009584441, 0.0, 0.0, 698.546880367, 524.7993478318, 0.0, 0.0, 0.0, 1.0, 0.0]
+

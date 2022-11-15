@@ -1,2 +1,2 @@
 library 'continuous_integration_pipeline'
-ciPipeline("--environment anymal")
+ciPipeline("--environment anymal --cmake-args '-DCMAKE_BUILD_TYPE=Release -DCUDA_ARCH_BIN=7.2' --dependencies 'git@github.com:ori-drs/opencv_catkin.git;master'")

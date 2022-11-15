@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>image_proc_cuda_python</name>
+  <version>0.0.0</version>
+  <description>Python bindings of image_proc_cuda</description>
+
+  <author email="matias@robots.ox.ac.uk">Matias Mattamala</author>
+  <maintainer email="matias@robots.ox.ac.uk">Matias Mattamala</maintainer>
+
+  <license>Proprietary</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>image_proc_cuda</depend>
+  <depend>pybind11_catkin</depend>
+  
+</package>
+

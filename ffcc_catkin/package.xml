@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>ffcc_catkin</name>
+  <version>0.0.0</version>
+  <description>Catkin-compatible implementation of CCC/FFCC white balance</description>
+
+  <author email="matias@robots.ox.ac.uk">Matias Mattamala</author>
+  <author email="name@email.com">Shane Yuan</author>
+
+  <maintainer email="matias@robots.ox.ac.uk">Matias Mattamala</maintainer>
+  <license>GNU</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>roscpp</depend>
+  <depend>roslib</depend>
+  <depend>dynamic_reconfigure</depend>
+
+  <export>
+    <nodelet plugin="${prefix}/nodelet_plugins.xml" />
+  </export>
+
+
+</package>
+
