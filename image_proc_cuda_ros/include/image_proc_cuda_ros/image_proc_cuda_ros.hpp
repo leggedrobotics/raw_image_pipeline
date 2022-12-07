@@ -37,8 +37,18 @@ public:
 
 private:
     // Publishers
-    void publishColorImage(const cv_bridge::CvImagePtr& cv_ptr,
-                           const sensor_msgs::ImageConstPtr& orig_image);
+    void publishColorImage(const cv_bridge::CvImagePtr& cv_ptr_processed,
+                           const sensor_msgs::ImageConstPtr& orig_image,
+                           int image_height,
+                           int image_width,
+                           const std::string& distortion_model,
+                           const cv::Mat& distortion_coefficients,
+                           const cv::Mat& camera_matrix,
+                           const cv::Mat& rectification_matrix,
+                           const cv::Mat& projection_matrix,
+                           image_transport::CameraPublisher& camera_publisher,
+                           image_transport::Publisher& slow_publisher,
+                           int& skipped_images);
     
     // Services
     bool resetWhiteBalanceHandler(std_srvs::Trigger::Request  &req, std_srvs::Trigger::Response &res);
@@ -54,6 +64,8 @@ private:
     image_transport::Subscriber sub_raw_image_;
     image_transport::CameraPublisher pub_color_image_;
     image_transport::Publisher pub_color_image_slow_;
+    image_transport::CameraPublisher pub_color_image_distorted_;
+    image_transport::Publisher pub_color_image_distorted_slow_;
     ros::ServiceServer reset_wb_temporal_consistency_server_;
 
     // ROS Params
@@ -63,10 +75,13 @@ private:
 
     std::string debayer_option_;
     std::string output_encoding_;
+    std::string output_frame_;
+    bool publish_distorted_; // To publish both distorted and undistorted
 
     // Slow topic
     int skip_number_of_images_for_slow_topic_;
     int skipped_images_for_slow_topic_;
+    int skipped_images_for_slow_topic_distorted_;
 };
 
-}  // namespace image_proc_cuda
+} // namespace image_proc_cuda

@@ -57,6 +57,7 @@ public:
 
     // Setters
     void setDebayerOption(const std::string option);
+    void setKeepDistorted(bool enabled);
     void setFlip(bool enabled);
     void setWhiteBalance(bool enabled);
     void setWhiteBalanceMethod(const std::string& method);
@@ -101,6 +102,16 @@ public:
     cv::Mat getRectificationMatrix() const;
     cv::Mat getProjectionMatrix() const;
     std::vector<double> getColorCalibrationMatrix() const;
+    
+    // Original parameters
+    std::string getOriginalDistortionModel() const;
+    cv::Mat getOriginalCameraMatrix() const;
+    cv::Mat getOriginalDistortionCoefficients() const;
+    cv::Mat getOriginalRectificationMatrix() const;
+    cv::Mat getOriginalProjectionMatrix() const;
+
+    // Get distorted 
+    cv::Mat getDistortedImage() const;
     
 private:
     // Applies demosaicing
@@ -156,6 +167,7 @@ private:
     bool run_color_enhancer_;
     bool run_color_calibration_;
     bool run_undistortion_;
+    bool keep_distorted_;
 
     // Debayer Params
     std::string debayer_option_;
@@ -196,13 +208,22 @@ private:
     // Calibration & undistortion
     bool calibration_available_;
     std::string distortion_model_;
+    // Original - "distorted" parameters
     cv::Matx33d camera_matrix_;
     cv::Matx14d distortion_coeff_;
     cv::Matx33d rectification_matrix_;
     cv::Matx34d projection_matrix_;
+    // Undistorted parameters
+    cv::Matx33d undistorted_camera_matrix_;
+    cv::Matx14d undistorted_distortion_coeff_;
+    cv::Matx33d undistorted_rectification_matrix_;
+    cv::Matx34d undistorted_projection_matrix_;
     cv::Size image_size_;
     cv::cuda::GpuMat undistortion_map_x_;
     cv::cuda::GpuMat undistortion_map_y_;
+
+    // Distorted image
+    cv::Mat distorted_image_;
 
     // Debug
     bool dump_images_;

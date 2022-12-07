@@ -54,6 +54,7 @@ void ImageProcCuda::loadParams(const std::string& file_path)
         run_color_enhancer_ = utils::get(node, "run_color_enhancer", false);
         run_color_calibration_ = utils::get(node, "run_color_calibration", false);
         run_undistortion_   = utils::get(node, "run_undistortion", false);
+        keep_distorted_     = utils::get(node, "keep_distorted", false);
         // Debayer Params
         debayer_option_ = utils::get<std::string>(node, "debayer_option", "auto");
         // White balance
@@ -168,6 +169,11 @@ void ImageProcCuda::initColorCalibrationMatrix(const cv::Matx33d& matrix)
 void ImageProcCuda::setDebayerOption(const std::string option) 
 {
     debayer_option_ = option; 
+}
+
+void ImageProcCuda::setKeepDistorted(bool enabled)
+{
+    keep_distorted_ = enabled;
 }
 
 void ImageProcCuda::setFlip(bool enabled)
@@ -353,11 +359,26 @@ std::string ImageProcCuda::getDistortionModel() const
         return "none";
     }
 }
+std::string ImageProcCuda::getOriginalDistortionModel() const
+{
+    if(calibration_available_)
+    {
+        return distortion_model_;
+    }
+    else {
+        return "none";
+    }
+}
 
 cv::Mat ImageProcCuda::getCameraMatrix() const
 {
     cv::Rect slice(0, 0, 3, 3);
     return cv::Mat(projection_matrix_)(slice).clone();
+}
+
+cv::Mat ImageProcCuda::getOriginalCameraMatrix() const
+{
+    return cv::Mat(camera_matrix_).clone();
 }
 
 cv::Mat ImageProcCuda::getDistortionCoefficients() const
@@ -382,12 +403,37 @@ cv::Mat ImageProcCuda::getDistortionCoefficients() const
     }
 }
 
+cv::Mat ImageProcCuda::getOriginalDistortionCoefficients() const
+{
+    if(calibration_available_)
+    {
+        // Return original distortion vector
+        return cv::Mat(distortion_coeff_).clone();
+    } 
+    else
+    {
+        // Return just zeros
+        return cv::Mat::zeros(1, 4, CV_64F);
+    }
+}
+
 cv::Mat ImageProcCuda::getRectificationMatrix() const
 {
     return cv::Mat(rectification_matrix_).clone();
 }
 
+cv::Mat ImageProcCuda::getOriginalRectificationMatrix() const
+{
+    return cv::Mat(rectification_matrix_).clone();
+}
+
+
 cv::Mat ImageProcCuda::getProjectionMatrix() const
+{
+    return cv::Mat(projection_matrix_).clone();
+}
+
+cv::Mat ImageProcCuda::getOriginalProjectionMatrix() const
 {
     return cv::Mat(projection_matrix_).clone();
 }
@@ -405,6 +451,11 @@ std::vector<double> ImageProcCuda::getColorCalibrationMatrix() const
         for (size_t j=0; j<3; j++)
             out.push_back(color_calibration_matrix_[i][j]);
     return out;
+}
+
+cv::Mat ImageProcCuda::getDistortedImage() const
+{
+    return distorted_image_.clone();
 }
 
 cv::Mat ImageProcCuda::process(const cv::Mat& image, const std::string& encoding) {
@@ -462,6 +513,11 @@ bool ImageProcCuda::apply(cv::Mat& image, const std::string& encoding)
     dumpGpuImage("color_enhanced", image_d);
 
     // Undistort
+    if (keep_distorted_)
+    {
+        image_d.download(distorted_image_);
+    }
+
     if (run_undistortion_)
         undistort(image_d);
     dumpGpuImage("undistorted", image_d);

@@ -14,6 +14,7 @@
   <arg name="run_color_calibration"                default="false"/>
   <arg name="run_color_enhancer"                   default="false"/>
   <arg name="run_undistortion"                     default="false"/>
+  <arg name="publish_distorted"                    default="false"/>   <!-- If should publish both distorted and undistorted (when running undistortion)-->
 
   <!-- Camera -->
   <arg name="cam0"                                 default="false"/>
@@ -46,6 +47,7 @@
   <arg name="input_topic0"                         default="alphasense_driver_ros/cam0"/>
   <arg name="transport0"                           default="raw"/> 
   <arg name="output_topic0"                        default="alphasense_driver_ros/cam0/debayered"/>
+  <arg name="output_frame0"                        default="cam0_sensor_frame_helper"/>
   <arg name="needs_rotation_cam0"                  default="false"/>
   <arg name="calibration_cam0"                     default="$(find image_proc_cuda)/config/alphasense_calib_example.yaml"/>
   <arg name="color_calibration_cam0"               default="$(find image_proc_cuda)/config/alphasense_color_calib_example.yaml"/>
@@ -53,6 +55,7 @@
   <arg name="input_topic1"                         default="alphasense_driver_ros/cam1"/>
   <arg name="transport1"                           default="raw"/> 
   <arg name="output_topic1"                        default="alphasense_driver_ros/cam1/debayered"/>
+  <arg name="output_frame1"                        default="cam1_sensor_frame_helper"/>
   <arg name="needs_rotation_cam1"                  default="false"/>
   <arg name="calibration_cam1"                     default="$(find image_proc_cuda)/config/alphasense_calib_example.yaml"/>
   <arg name="color_calibration_cam1"               default="$(find image_proc_cuda)/config/alphasense_color_calib_example.yaml"/>
@@ -60,6 +63,7 @@
   <arg name="input_topic2"                         default="alphasense_driver_ros/cam2"/>
   <arg name="transport2"                           default="raw"/> 
   <arg name="output_topic2"                        default="alphasense_driver_ros/cam2/debayered"/>
+  <arg name="output_frame2"                        default="cam2_sensor_frame_helper"/>
   <arg name="needs_rotation_cam2"                  default="false"/>
   <arg name="calibration_cam2"                     default="$(find image_proc_cuda)/config/alphasense_calib_example.yaml"/>
   <arg name="color_calibration_cam2"               default="$(find image_proc_cuda)/config/alphasense_color_calib_example.yaml"/>
@@ -67,6 +71,7 @@
   <arg name="input_topic3"                         default="alphasense_driver_ros/cam3"/>
   <arg name="transport3"                           default="raw"/> 
   <arg name="output_topic3"                        default="alphasense_driver_ros/cam3/debayered"/>
+  <arg name="output_frame3"                        default="cam3_sensor_frame_helper"/>
   <arg name="needs_rotation_cam3"                  default="false"/>
   <arg name="calibration_cam3"                     default="$(find image_proc_cuda)/config/alphasense_calib_example.yaml"/>
   <arg name="color_calibration_cam3"               default="$(find image_proc_cuda)/config/alphasense_color_calib_example.yaml"/>
@@ -74,6 +79,7 @@
   <arg name="input_topic4"                         default="alphasense_driver_ros/cam4"/>
   <arg name="transport4"                           default="raw"/> 
   <arg name="output_topic4"                        default="alphasense_driver_ros/cam4/debayered"/>
+  <arg name="output_frame4"                        default="cam4_sensor_frame_helper"/>
   <arg name="needs_rotation_cam4"                  default="false"/>
   <arg name="calibration_cam4"                     default="$(find image_proc_cuda)/config/alphasense_calib_example.yaml"/>
   <arg name="color_calibration_cam4"               default="$(find image_proc_cuda)/config/alphasense_color_calib_example.yaml"/>
@@ -81,6 +87,7 @@
   <arg name="input_topic5"                         default="alphasense_driver_ros/cam5"/>
   <arg name="transport5"                           default="raw"/> 
   <arg name="output_topic5"                        default="alphasense_driver_ros/cam5/debayered"/>
+  <arg name="output_frame5"                        default="cam5_sensor_frame_helper"/>
   <arg name="needs_rotation_cam5"                  default="false"/>
   <arg name="calibration_cam5"                     default="$(find image_proc_cuda)/config/alphasense_calib_example.yaml"/>
   <arg name="color_calibration_cam5"               default="$(find image_proc_cuda)/config/alphasense_color_calib_example.yaml"/>
@@ -88,6 +95,7 @@
   <arg name="input_topic6"                         default="alphasense_driver_ros/cam6"/>
   <arg name="transport6"                           default="raw"/> 
   <arg name="output_topic6"                        default="alphasense_driver_ros/cam6/debayered"/>
+  <arg name="output_frame6"                        default="cam6_sensor_frame_helper"/>
   <arg name="needs_rotation_cam6"                  default="false"/>
   <arg name="calibration_cam6"                     default="$(find image_proc_cuda)/config/alphasense_calib_example.yaml"/>
   <arg name="color_calibration_cam6"               default="$(find image_proc_cuda)/config/alphasense_color_calib_example.yaml"/>
@@ -97,10 +105,12 @@
   <node if="$(arg cam0)" name="image_proc_cuda_ros_node_cam0" type="image_proc_cuda_ros_node" pkg="image_proc_cuda_ros" output="screen" launch-prefix="$(arg launch_prefix)">
     <!-- <param name="dump_images"                          value="$(arg dump_images)"/> -->
     <param name="debayer_option"                       value="$(arg debayer_option)"/>
+    <param name="publish_distorted"                    value="$(arg publish_distorted)"/>
     <param name="output_encoding"                      value="$(arg output_encoding)"/>
     <param name="input_topic"                          value="$(arg input_topic0)"/>
     <param name="transport"                            value="$(arg transport0)"/>
     <param name="output_topic"                         value="$(arg output_topic0)"/>
+    <param name="output_frame"                         value="$(arg output_frame0)"/>
     <param name="run_white_balance"                    value="$(arg run_white_balance)"/>
     <param name="run_gamma_correction"                 value="$(arg run_gamma_correction)"/>
     <param name="run_vignetting_correction"            value="$(arg run_vignetting_correction)"/>
@@ -130,10 +140,12 @@
   <node if="$(arg cam1)" name="image_proc_cuda_ros_node_cam1" type="image_proc_cuda_ros_node" pkg="image_proc_cuda_ros" output="screen">
     <!-- <param name="dump_images"                          value="$(arg dump_images)"/> -->
     <param name="debayer_option"                       value="$(arg debayer_option)"/>
+    <param name="publish_distorted"                    value="$(arg publish_distorted)"/>
     <param name="output_encoding"                      value="$(arg output_encoding)"/>
     <param name="input_topic"                          value="$(arg input_topic1)"/>
     <param name="transport"                            value="$(arg transport1)"/>
     <param name="output_topic"                         value="$(arg output_topic1)"/>
+    <param name="output_frame"                         value="$(arg output_frame1)"/>
     <param name="run_white_balance"                    value="$(arg run_white_balance)"/>
     <param name="run_gamma_correction"                 value="$(arg run_gamma_correction)"/>
     <param name="run_vignetting_correction"            value="$(arg run_vignetting_correction)"/>
@@ -163,10 +175,12 @@
   <node if="$(arg cam2)" name="image_proc_cuda_ros_node_cam2" type="image_proc_cuda_ros_node" pkg="image_proc_cuda_ros" output="screen">
     <!-- <param name="dump_images"                          value="$(arg dump_images)"/> -->
     <param name="debayer_option"                       value="$(arg debayer_option)"/>
+    <param name="publish_distorted"                    value="$(arg publish_distorted)"/>
     <param name="output_encoding"                      value="$(arg output_encoding)"/>
     <param name="input_topic"                          value="$(arg input_topic2)"/>
     <param name="transport"                            value="$(arg transport2)"/>
     <param name="output_topic"                         value="$(arg output_topic2)"/>
+    <param name="output_frame"                         value="$(arg output_frame2)"/>
     <param name="run_white_balance"                    value="$(arg run_white_balance)"/>
     <param name="run_gamma_correction"                 value="$(arg run_gamma_correction)"/>
     <param name="run_vignetting_correction"            value="$(arg run_vignetting_correction)"/>
@@ -196,10 +210,12 @@
   <node if="$(arg cam3)" name="image_proc_cuda_ros_node_cam3" type="image_proc_cuda_ros_node" pkg="image_proc_cuda_ros" output="screen" launch-prefix="$(arg launch_prefix)">
     <!-- <param name="dump_images"                          value="$(arg dump_images)"/> -->
     <param name="debayer_option"                       value="$(arg debayer_option)"/>
+    <param name="publish_distorted"                    value="$(arg publish_distorted)"/>
     <param name="output_encoding"                      value="$(arg output_encoding)"/>
     <param name="input_topic"                          value="$(arg input_topic3)"/>
     <param name="transport"                            value="$(arg transport3)"/>
     <param name="output_topic"                         value="$(arg output_topic3)"/>
+    <param name="output_frame"                         value="$(arg output_frame3)"/>
     <param name="run_white_balance"                    value="$(arg run_white_balance)"/>
     <param name="run_gamma_correction"                 value="$(arg run_gamma_correction)"/>
     <param name="run_vignetting_correction"            value="$(arg run_vignetting_correction)"/>
@@ -229,10 +245,12 @@
   <node if="$(arg cam4)" name="image_proc_cuda_ros_node_cam4" type="image_proc_cuda_ros_node" pkg="image_proc_cuda_ros" output="screen">
     <!-- <param name="dump_images"                          value="$(arg dump_images)"/> -->
     <param name="debayer_option"                       value="$(arg debayer_option)"/>
+    <param name="publish_distorted"                    value="$(arg publish_distorted)"/>
     <param name="output_encoding"                      value="$(arg output_encoding)"/>
     <param name="input_topic"                          value="$(arg input_topic4)"/>
     <param name="transport"                            value="$(arg transport4)"/>
     <param name="output_topic"                         value="$(arg output_topic4)"/>
+    <param name="output_frame"                         value="$(arg output_frame4)"/>
     <param name="run_white_balance"                    value="$(arg run_white_balance)"/>
     <param name="run_gamma_correction"                 value="$(arg run_gamma_correction)"/>
     <param name="run_vignetting_correction"            value="$(arg run_vignetting_correction)"/>
@@ -262,10 +280,12 @@
   <node if="$(arg cam5)" name="image_proc_cuda_ros_node_cam5" type="image_proc_cuda_ros_node" pkg="image_proc_cuda_ros" output="screen">
     <!-- <param name="dump_images"                          value="$(arg dump_images)"/> -->
     <param name="debayer_option"                       value="$(arg debayer_option)"/>
+    <param name="publish_distorted"                    value="$(arg publish_distorted)"/>
     <param name="output_encoding"                      value="$(arg output_encoding)"/>
     <param name="input_topic"                          value="$(arg input_topic5)"/>
     <param name="transport"                            value="$(arg transport5)"/>
     <param name="output_topic"                         value="$(arg output_topic5)"/>
+    <param name="output_frame"                         value="$(arg output_frame5)"/>
     <param name="run_white_balance"                    value="$(arg run_white_balance)"/>
     <param name="run_gamma_correction"                 value="$(arg run_gamma_correction)"/>
     <param name="run_vignetting_correction"            value="$(arg run_vignetting_correction)"/>
@@ -295,10 +315,12 @@
   <node if="$(arg cam6)" name="image_proc_cuda_ros_node_cam6" type="image_proc_cuda_ros_node" pkg="image_proc_cuda_ros" output="screen">
     <!-- <param name="dump_images"                          value="$(arg dump_images)"/> -->
     <param name="debayer_option"                       value="$(arg debayer_option)"/>
+    <param name="publish_distorted"                    value="$(arg publish_distorted)"/>
     <param name="output_encoding"                      value="$(arg output_encoding)"/>
     <param name="input_topic"                          value="$(arg input_topic6)"/>
     <param name="transport"                            value="$(arg transport6)"/>
     <param name="output_topic"                         value="$(arg output_topic6)"/>
+    <param name="output_frame"                         value="$(arg output_frame6)"/>
     <param name="run_white_balance"                    value="$(arg run_white_balance)"/>
     <param name="run_gamma_correction"                 value="$(arg run_gamma_correction)"/>
     <param name="run_vignetting_correction"            value="$(arg run_vignetting_correction)"/>

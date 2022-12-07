@@ -1,5 +1,5 @@
 #include <image_proc_cuda_ros/image_proc_cuda_ros.hpp>
-#include <ros/package.h>
+#include <ros/ros.h>
 
 namespace image_proc_cuda
 {
@@ -27,17 +27,23 @@ void ImageProcCudaRos::setupROSparams()
 {
     // Topic options
     if (!nh_private_.getParam("input_topic", input_topic_))
-        ROS_ERROR_STREAM("could not get input topic!");
+        ROS_ERROR_STREAM("Could not get input topic!");
     else
-        ROS_INFO_STREAM("input topic: " << input_topic_);
+        ROS_INFO_STREAM("Input topic: " << input_topic_);
 
     if (!nh_private_.param<std::string>("transport", transport_, "raw"))
-        ROS_ERROR_STREAM("Assuming topic is raw!");
+        ROS_WARN_STREAM("Assuming topic is raw!");
 
     if (!nh_private_.getParam("output_topic", output_topic_))
-        ROS_ERROR_STREAM("could not get output topic!");
+        ROS_WARN_STREAM("Could not get output topic!");
     else
-        ROS_INFO_STREAM("output topic: " << output_topic_);
+        ROS_INFO_STREAM("Output topic: " << output_topic_);
+
+    // Keep distorted image
+    if (!nh_private_.param<bool>("publish_distorted", publish_distorted_, false))
+        ROS_WARN_STREAM(
+            "Could not get publish_distorted from ROS-params, defaulting to: " << publish_distorted_);
+    image_proc_.setKeepDistorted(publish_distorted_);
 
     // Debayer options
     std::string debayer_option;
@@ -49,6 +55,9 @@ void ImageProcCudaRos::setupROSparams()
     // Output options
     if (!nh_private_.param<std::string>("output_encoding", output_encoding_, "BGR"))
         ROS_WARN_STREAM("could not get output encoding, defaulting to: " << output_encoding_);
+
+    if (!nh_private_.param<std::string>("output_frame", output_frame_, "passthrough"))
+        ROS_WARN_STREAM("could not get output_frame, defaulting to: " << output_frame_);
 
     if (!nh_private_.param<int>("skip_number_of_images_for_slow_topic",
                            skip_number_of_images_for_slow_topic_, -1))
@@ -287,6 +296,16 @@ void ImageProcCudaRos::setupSubAndPub()
                                                 transport_hint                      // hints
     );
     // Set up the processed image publisher.
+    if (publish_distorted_)
+    {
+        pub_color_image_ = image_transport_.advertiseCamera(output_topic_ + "/rect/image", ros_queue_size);
+        pub_color_image_slow_ = image_transport_.advertise(output_topic_ + "/rect/image/slow", ros_queue_size);
+        
+        pub_color_image_distorted_ = image_transport_.advertiseCamera(output_topic_, ros_queue_size);
+        pub_color_image_distorted_slow_ = image_transport_.advertise(output_topic_ + "/slow", ros_queue_size);
+    }
+    else
+    {
     pub_color_image_ = image_transport_.advertiseCamera(output_topic_, ros_queue_size);
     pub_color_image_slow_ = image_transport_.advertise(output_topic_ + "/slow", ros_queue_size);
 
@@ -299,25 +318,53 @@ void ImageProcCudaRos::imageCallback(const sensor_msgs::ImageConstPtr& image_msg
 {
     // Copy Ros msg to opencv
     CHECK_NOTNULL(image_msg);
-    cv_bridge::CvImagePtr cv_ptr;
+    cv_bridge::CvImagePtr cv_ptr_processed;
     if (transport_ != "raw")
-        cv_ptr = cv_bridge::toCvCopy(image_msg, "bgr8");
+        cv_ptr_processed = cv_bridge::toCvCopy(image_msg, "bgr8");
     else
-        cv_ptr = cv_bridge::toCvCopy(image_msg, image_msg->encoding);
+        cv_ptr_processed = cv_bridge::toCvCopy(image_msg, image_msg->encoding);
 
-    CHECK_NOTNULL(cv_ptr);
+    CHECK_NOTNULL(cv_ptr_processed);
 
-    if (cv_ptr->image.empty())
+    if (cv_ptr_processed->image.empty())
     {
         ROS_WARN("image empty");
         return;
     }
 
     // Call debayer cuda
-    image_proc_.apply(cv_ptr->image, image_msg->encoding);
+    image_proc_.apply(cv_ptr_processed->image, image_msg->encoding);
 
     // Publish color image
-    publishColorImage(cv_ptr, image_msg);
+    publishColorImage(cv_ptr_processed,
+                      image_msg,
+                      image_proc_.getImageHeight(),
+                      image_proc_.getImageWidth(),
+                      image_proc_.getDistortionModel(),
+                      image_proc_.getDistortionCoefficients(),
+                      image_proc_.getCameraMatrix(),
+                      image_proc_.getRectificationMatrix(),
+                      image_proc_.getProjectionMatrix(),
+                      pub_color_image_,
+                      pub_color_image_slow_,
+                      skipped_images_for_slow_topic_);
+
+    if (publish_distorted_) {
+        cv_ptr_processed->image = image_proc_.getDistortedImage();
+        publishColorImage(cv_ptr_processed,
+                          image_msg,
+                          image_proc_.getImageHeight(),
+                          image_proc_.getImageWidth(),
+                          image_proc_.getOriginalDistortionModel(),
+                          image_proc_.getOriginalDistortionCoefficients(),
+                          image_proc_.getOriginalCameraMatrix(),
+                          image_proc_.getOriginalRectificationMatrix(),
+                          image_proc_.getOriginalProjectionMatrix(),
+                          pub_color_image_distorted_,
+                          pub_color_image_distorted_slow_,
+                          skipped_images_for_slow_topic_distorted_);
+        
+    }
 }
 
 bool ImageProcCudaRos::resetWhiteBalanceHandler(std_srvs::Trigger::Request  &req, std_srvs::Trigger::Response &res)
@@ -328,22 +375,33 @@ bool ImageProcCudaRos::resetWhiteBalanceHandler(std_srvs::Trigger::Request  &req
     return true;
 }
 
-void ImageProcCudaRos::publishColorImage(const cv_bridge::CvImagePtr& cv_ptr,
-                                    const sensor_msgs::ImageConstPtr& orig_image)
+void ImageProcCudaRos::publishColorImage(const cv_bridge::CvImagePtr& cv_ptr_processed,
+                                         const sensor_msgs::ImageConstPtr& orig_image,
+                                         int image_height,
+                                         int image_width,
+                                         const std::string& distortion_model,
+                                         const cv::Mat& distortion_coefficients,
+                                         const cv::Mat& camera_matrix,
+                                         const cv::Mat& rectification_matrix,
+                                         const cv::Mat& projection_matrix,
+                                         image_transport::CameraPublisher& camera_publisher,
+                                         image_transport::Publisher& slow_publisher,
+                                         int& skipped_images
+                                         )
 {
     // Note: Image is BGR
     // Convert image to output encoding
     if (output_encoding_ == "RGB")
-        cv::cvtColor(cv_ptr->image, cv_ptr->image, cv::COLOR_BGR2RGB);
+        cv::cvtColor(cv_ptr_processed->image, cv_ptr_processed->image, cv::COLOR_BGR2RGB);
 
     // Copy to ROS
-    CHECK_NOTNULL(cv_ptr);
+    CHECK_NOTNULL(cv_ptr_processed);
     CHECK_NOTNULL(orig_image);
-    const sensor_msgs::ImagePtr color_img_msg = cv_ptr->toImageMsg();
+    const sensor_msgs::ImagePtr color_img_msg = cv_ptr_processed->toImageMsg();
     CHECK_NOTNULL(color_img_msg);
 
     // Set output encoding
-    if(cv_ptr->image.channels() == 3){
+    if(cv_ptr_processed->image.channels() == 3){
         if (output_encoding_ == "RGB")
             color_img_msg->encoding = sensor_msgs::image_encodings::RGB8;
         else if (output_encoding_ == "BGR")
@@ -364,34 +422,43 @@ void ImageProcCudaRos::publishColorImage(const cv_bridge::CvImagePtr& cv_ptr,
     // }
     sensor_msgs::CameraInfoPtr color_camera_info_msg(new sensor_msgs::CameraInfo());
     
+    // Fix output frame if required
+    if (output_frame_ == "passthrough"){
     color_camera_info_msg->header.frame_id = orig_image->header.frame_id;
+    } else {
+        color_img_msg->header.frame_id = output_frame_;
+        color_camera_info_msg->header.frame_id = output_frame_;
+    }
     color_camera_info_msg->header.stamp    = orig_image->header.stamp;
-    color_camera_info_msg->height = image_proc_.getImageHeight();
-    color_camera_info_msg->width = image_proc_.getImageWidth();
-    color_camera_info_msg->distortion_model = image_proc_.getDistortionModel();
+    color_camera_info_msg->height = image_height;
+    color_camera_info_msg->width = image_width;
+
     // Fix distortion model if it's none
-    if(color_camera_info_msg->distortion_model == "none")
+    if(color_camera_info_msg->distortion_model == "none") {
         color_camera_info_msg->distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
+    } else {
+        color_camera_info_msg->distortion_model = distortion_model;
+    }
     // Other calibration stuff
-    color_camera_info_msg->D = utils::toStdVector<double>(image_proc_.getDistortionCoefficients());
-    color_camera_info_msg->K = utils::toBoostArray<double, 9>(image_proc_.getCameraMatrix());
-    color_camera_info_msg->R = utils::toBoostArray<double, 9>(image_proc_.getRectificationMatrix());
-    color_camera_info_msg->P = utils::toBoostArray<double, 12>(image_proc_.getProjectionMatrix());
+    color_camera_info_msg->D = utils::toStdVector<double>(distortion_coefficients);
+    color_camera_info_msg->K = utils::toBoostArray<double, 9>(camera_matrix);
+    color_camera_info_msg->R = utils::toBoostArray<double, 9>(rectification_matrix);
+    color_camera_info_msg->P = utils::toBoostArray<double, 12>(projection_matrix);
 
     // Assign the original timestamp and publish
     color_img_msg->header.stamp = orig_image->header.stamp;
-    pub_color_image_.publish(color_img_msg, color_camera_info_msg);
+    camera_publisher.publish(color_img_msg, color_camera_info_msg);
 
     // Publish to slow topic
-    if (skipped_images_for_slow_topic_ >= skip_number_of_images_for_slow_topic_ ||
+    if (skipped_images >= skip_number_of_images_for_slow_topic_ ||
         skip_number_of_images_for_slow_topic_ <= 0)
     {
         pub_color_image_slow_.publish(color_img_msg);
-        skipped_images_for_slow_topic_ = 0;
+        skipped_images = 0;
     }
     else
     {
-        skipped_images_for_slow_topic_++;
+        skipped_images++;
     }
 }
 
