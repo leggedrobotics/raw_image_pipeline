@@ -306,8 +306,9 @@ void ImageProcCudaRos::setupSubAndPub()
     }
     else
     {
-    pub_color_image_ = image_transport_.advertiseCamera(output_topic_, ros_queue_size);
-    pub_color_image_slow_ = image_transport_.advertise(output_topic_ + "/slow", ros_queue_size);
+        pub_color_image_ = image_transport_.advertiseCamera(output_topic_, ros_queue_size);
+        pub_color_image_slow_ = image_transport_.advertise(output_topic_ + "/slow", ros_queue_size);
+    }
 
     // Setup service calls
     reset_wb_temporal_consistency_server_ = nh_private_.advertiseService("reset_white_balance", 
