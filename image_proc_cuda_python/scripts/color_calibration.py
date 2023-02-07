@@ -51,10 +51,10 @@ def show_image(image_bgr: np.array) -> None:
 
 def show_calibration_result(ref_bgr: np.array, input_list: list, corr_list: np.array, save_path: str) -> None:
     ref_rgb = cv2.cvtColor(ref_bgr, cv2.COLOR_BGR2RGB)
-    
-    N = len(input_list)
 
-    fig, axs = plt.subplots(N, 3, figsize=(1 * 3, 1 * N))
+    N = len(input_list)
+    scale = 2
+    fig, axs = plt.subplots(N, 3, figsize=(scale * 3, scale * N))
     for i in range(N):
         input_rgb = cv2.cvtColor(input_list[i], cv2.COLOR_BGR2RGB)
         corr_rgb = cv2.cvtColor(corr_list[i], cv2.COLOR_BGR2RGB)
@@ -65,23 +65,27 @@ def show_calibration_result(ref_bgr: np.array, input_list: list, corr_list: np.a
         for ax in axs[i]:
             ax.set_xticks([])
             ax.set_yticks([])
-    plt.axis('off')
+    plt.axis("off")
     plt.tight_layout()
     plt.savefig(join(save_path, "calibrated_images.png"))
+
 
 def save_calibration_matrix(filename: str, C: np.array) -> None:
     pass
 
-def apply_color_correction(color_matrix: np.matrix, img: np.array) -> np.array:
-    H, W, C = img.shape
+
+def apply_color_correction(color_correction: np.matrix, img: np.array) -> np.array:
+    C = color_correction["matrix"]
+    b = color_correction["bias"]
+
     # change from HWC to CHW (channels first)
     img_chw = np.einsum("ijk->kij", img)
     # reshape as a vector of channels
     img_channels = img_chw.reshape(3, -1)
     # apply transformation
-    img_channels = color_matrix @ img_channels
+    img_channels = C @ img_channels + 255 * b
     # reshape
-    img_chw = img_channels.reshape(C, H, W)
+    img_chw = img_channels.reshape(img.shape)
     # Return to opencv's HWC
     return np.einsum("kij->ijk", img_chw)
 
@@ -142,7 +146,7 @@ def get_color_centroids(img: np.array, dim=COLOR_CHECKER_DIM) -> np.array:
     # return np.concatenate(rgb_centroids)
 
 
-def find_color_calibration(input: np.array, reference: np.array, loss="linear") -> np.array:
+def find_color_calibration(input: np.array, reference: np.array, loss="linear", compute_bias=False) -> np.array:
     # check input size
     assert input.shape == reference.shape
 
@@ -156,23 +160,34 @@ def find_color_calibration(input: np.array, reference: np.array, loss="linear") 
     # build optimization costs
     def fun(x: np.array):
         # sum || input * C - reference ||^2
-        x = x.reshape((3, 3))
-        return np.linalg.norm(np.matmul(x, input) - reference) # + reg * np.linalg.norm(x)
-    
+        C = np.copy(x[:9].reshape((3, 3)))
+        bias = np.copy(x[9:].reshape((3, 1)))
+        color_corrected = np.matmul(C, input)
+
+        if compute_bias:
+            color_corrected = color_corrected + 255 * bias
+        
+        # Return residual
+        return np.linalg.norm(color_corrected - reference)  # + reg * np.linalg.norm(x)
+
     def constraint(x: np.array):
         x = x.reshape((3, 3))
         return np.matmul(x, input).flatten()
+
     nonlinear_constraint = NonlinearConstraint(constraint, 0, 255)
 
     # minimize
-    x0 = np.eye(3).flatten() * 0.1
+    x0 = np.zeros((12,))
+    x0[:9] = np.eye(3).flatten() * 0.1
     sol = least_squares(fun, x0, loss=loss)
-    # sol = minimize(fun, x0, constraints=[nonlinear_constraint]) 
+    # sol = minimize(fun, x0, constraints=[nonlinear_constraint])
 
-    C = sol.x.reshape((3, 3)).astype(np.float32)
+    # Recover calibration matrix and bias
+    C = sol.x[:9].reshape((3, 3)).astype(np.float32)
+    b = sol.x[9:].reshape((3, 1)).astype(np.float32)
 
     # Return color calibration matrix C
-    return C
+    return {"matrix": C, "bias": b, "sol": sol}
 
 
 def main(*arg, **args):
@@ -194,6 +209,11 @@ def main(*arg, **args):
         type=str,
         help="Loss used in the optimization. Options: 'linear', 'soft_l1', 'huber', 'cauchy', 'arctan'",
         default="linear",
+    )
+    parser.add_argument(
+        "--compute_bias",
+        help="If bias should be computed",
+        action="store_true",
     )
 
     args = parser.parse_args()
@@ -247,29 +267,32 @@ def main(*arg, **args):
     centroids_ref_list = [centroid_ref] * len(centroids_in_list)
 
     # Create training data
-    centroids_in  = np.concatenate(centroids_in_list, axis=0)
+    centroids_in = np.concatenate(centroids_in_list, axis=0)
     centroids_ref = np.concatenate(centroids_ref_list, axis=0)
 
     # Find color calibration matrix
     print("Optimizing color correction matrix...", end="")
-    C = find_color_calibration(centroids_in, centroids_ref, loss=args.loss)
-    print("done")
+    sol = find_color_calibration(centroids_in, centroids_ref, loss=args.loss, compute_bias=args.compute_bias)
+    print(f"done. Cost: {sol['sol']['cost']}")
 
     # Apply calibration
-    cropped_corr_list = [apply_color_correction(C, img).astype(np.uint8) for img in cropped_in_list]
+    cropped_corr_list = [apply_color_correction(sol, img).astype(np.uint8) for img in cropped_in_list]
 
     # Show result
     print("Generating visualization of calibrated images...")
     show_calibration_result(cropped_ref, cropped_in_list, cropped_corr_list, save_path=args.output_path)
 
     # Save as YAML file
-    calib_str = f"""color_calibration_matrix:\n  rows: 3\n  cols: 3\n  data: {str([x for x in C.flatten()])}"""
-    print("\n-- Color calibration --")
+    calib_str = f"""color_calibration_matrix:\n  rows: 3\n  cols: 3\n  data: {str([x for x in sol["matrix"].flatten()])}"""
+    calib_str += f"""\ncolor_calibration_bias:\n  rows: 3\n  cols: 1\n  data: {str([x for x in sol["bias"].flatten()])}"""
+    # Print calibration putput
     print(calib_str)
-
+    
     yaml = YAML()
     yaml.width = 200
-    with open(os.path.join(args.output_path, "color_calibration.yaml"), "w") as out_file:
+    output_file = os.path.join(args.output_path, "color_calibration.yaml")
+    print(f"Saving calibration to {output_file}")
+    with open(output_file, "w") as out_file:
         yaml.dump(yaml.load(calib_str), out_file)
 
 
