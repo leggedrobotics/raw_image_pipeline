@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>ffcc_catkin</name>
+  <name>image_proc_white_balance</name>
   <version>0.0.0</version>
-  <description>Catkin-compatible implementation of CCC/FFCC white balance</description>
+  <description>Cpp implementation of CCC/FFCC white balance</description>
 
-  <author email="matias@robots.ox.ac.uk">Matias Mattamala</author>
   <author email="name@email.com">Shane Yuan</author>
+  <author email="matias@robots.ox.ac.uk">Matias Mattamala</author>
 
   <maintainer email="matias@robots.ox.ac.uk">Matias Mattamala</maintainer>
   <license>GNU</license>
@@ -21,4 +21,3 @@
 
 
 </package>
-

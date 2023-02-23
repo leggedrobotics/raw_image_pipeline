@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(ffcc_catkin)
+project(image_proc_white_balance)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wextra -O3 -DNDEBUG")
@@ -24,7 +24,7 @@ message("OpenCV version: ${OpenCV_Version}")
 message("OpenCV path: ${OpenCV_DIR}")
 
 generate_dynamic_reconfigure_options(
-  cfg/ffcc.cfg
+  cfg/image_proc_white_balance.cfg
 )
 
 catkin_package(
@@ -46,8 +46,9 @@ set(CUDA_LIBRARIES "-L/usr/local/cuda/lib64 -lcudart -lcuda -lcudadevrt")
 set(SYSTEM_LIBS "-L/usr/lib/aarch64-linux-gnu -L/usr/lib/aarch64-linux-gnu/tegra -lnppicc -lnppig -lnppial -lnppif -lnppist -lnppidei -lnpps -lnppisu")
 
 add_library(${PROJECT_NAME} SHARED
-    src/ffcc_catkin/ffcc.cpp
+    src/image_proc_white_balance/convolutional_color_constancy.cpp
 )
+
 
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
@@ -59,7 +60,7 @@ target_link_libraries(${PROJECT_NAME}
 
 # Add executable
 add_executable(${PROJECT_NAME}_node
-    src/ffcc_node.cpp
+    src/image_proc_white_balance_node.cpp
 )
 target_link_libraries(${PROJECT_NAME}_node
     ${PROJECT_NAME}

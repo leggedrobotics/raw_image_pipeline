@@ -24,10 +24,10 @@ To check the status of the Alphasense units available at RSL, check the [**RSL A
 ## Packages
 
 1. **`debayer_cuda`**: This is a wrapper for backward compatibility. It only calls the launchfiles from `image_proc_cuda_ros`
-2. **`ffcc_catkin`**: This is a white balance algorithm built upon Shane Yuan's [code](https://github.com/yuanxy92/AutoWhiteBalance), which based on two papers ([1](https://arxiv.org/abs/1507.00410), [2](https://arxiv.org/abs/1611.07596)) by Jon Barron (Google).
-3. **`image_proc_cuda`**: ROS-independent implementation of the image proc pipeline.
-4. **`image_proc_cuda_python`**: Python bindings for `image_proc_cuda`.
-5. **`image_proc_cuda_ros`**: ROS interface to run the processing pipeline.
+2. **`image_proc_cuda`**: ROS-independent implementation of the image proc pipeline.
+3. **`image_proc_cuda_python`**: Python bindings for `image_proc_cuda`.
+4. **`image_proc_cuda_ros`**: ROS interface to run the processing pipeline.
+5. **`image_proc_white_balance`**: This is a white balance algorithm built upon Shane Yuan's [code](https://github.com/yuanxy92/AutoWhiteBalance), which based on two papers ([1](https://arxiv.org/abs/1507.00410), [2](https://arxiv.org/abs/1611.07596)) by Jon Barron (Google).
 
 ## Requirements and compilation
 
@@ -116,7 +116,7 @@ The `image_proc_cuda` pipeline implements the following structure:
 
 Modules can be disabled (except debayer) and the image will be processed by the subsequent modules. The modules available are:
 * **Debayer**: `auto`, `bayer_bggr8`, `bayer_gbrg8`, `bayer_grbg8`, `bayer_rggb8`
-* **white balance**: `simple`, `grey_world`, `learned` (from [OpenCV](https://docs.opencv.org/4.x/df/db9/namespacecv_1_1xphoto.html)), `ffcc` (from `ffcc_ros` package), `pca` (custom implementation)
+* **white balance**: `simple`, `grey_world`, `learned` (from [OpenCV](https://docs.opencv.org/4.x/df/db9/namespacecv_1_1xphoto.html)), `ccc` (from `image_proc_white_balance` package), `pca` (custom implementation)
 * **Gamma correction**: `default` (from OpenCV), `custom` (custom implementation)
 * **Vignetting correction**: Removes the darkening effect of the lens toward the edges of the image by applying a polynomial mask.
 * **Histogram equalization**: Uses OpenCV's [CLAHE](https://docs.opencv.org/4.2.0/d5/daf/tutorial_py_histogram_equalization.html) by default.

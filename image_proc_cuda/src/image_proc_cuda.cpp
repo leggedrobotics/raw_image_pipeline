@@ -14,8 +14,8 @@ ImageProcCuda::ImageProcCuda(const std::string& params_path,
     dump_images_(false),
     idx_(0)
 {
-    // Initialize FFCC
-    ffccWBPtr_ = std::make_unique<ffcc::FastFourierColorConstancyWB>();
+    // Initialize CCC
+    cccWBPtr_ = std::make_unique<image_proc_white_balance::ConvolutionalColorConstancyWB>();
 
     // Load parameters
     if(params_path.empty())
@@ -58,7 +58,7 @@ void ImageProcCuda::loadParams(const std::string& file_path)
         // Debayer Params
         debayer_option_ = utils::get<std::string>(node, "debayer_option", "auto");
         // White balance
-        white_balance_method_ = utils::get<std::string>(node, "white_balance_method", "ffcc");
+        white_balance_method_ = utils::get<std::string>(node, "white_balance_method", "ccc");
         white_balance_clipping_percentile_  = utils::get(node, "white_balance_clipping_percentile", 20.0);
         white_balance_saturation_threshold_ = utils::get(node, "white_balance_saturation_threshold", 0.8);
         white_balance_temporal_consistency_ = utils::get(node, "white_balance_temporal_consistency", true);
@@ -329,7 +329,7 @@ void ImageProcCuda::setDumpImages(bool enabled)
 
 void ImageProcCuda::resetWhiteBalanceTemporalConsistency()
 {
-    ffccWBPtr_->resetTemporalConsistency();
+    cccWBPtr_->resetTemporalConsistency();
 }
 
 int ImageProcCuda::getImageHeight() const
@@ -623,17 +623,17 @@ void ImageProcCuda::whiteBalance(cv::cuda::GpuMat& image, const std::string& wb_
         wb->balanceWhite(tmp, tmp);
         image.upload(tmp);
     }
-    else if (wb_method == "ffcc")
+    else if (wb_method == "ccc")
     {
         // cv::Mat tmp;
         // image.download(tmp);
 
-        // FFCC white balancing - this works directly on GPU
-        ffccWBPtr_->setSaturationThreshold(white_balance_saturation_threshold_);
-        ffccWBPtr_->setTemporalConsistency(white_balance_temporal_consistency_);
-        ffccWBPtr_->setDebug(false);
+        // CCC white balancing - this works directly on GPU
+        cccWBPtr_->setSaturationThreshold(white_balance_saturation_threshold_);
+        cccWBPtr_->setTemporalConsistency(white_balance_temporal_consistency_);
+        cccWBPtr_->setDebug(false);
         cv::Mat out;
-        ffccWBPtr_->balanceWhite(image, image);
+        cccWBPtr_->balanceWhite(image, image);
         // image.upload(out);
     }
     else if (wb_method == "pca")
@@ -641,7 +641,7 @@ void ImageProcCuda::whiteBalance(cv::cuda::GpuMat& image, const std::string& wb_
         cv::Mat tmp;
         image.download(tmp);
 
-        // FFCC white balancing
+        // CCC white balancing
         pcaBalanceWhite(tmp);
 
         image.upload(tmp);
@@ -652,7 +652,7 @@ void ImageProcCuda::whiteBalance(cv::cuda::GpuMat& image, const std::string& wb_
             "White Balance method ["
             + wb_method
             + "] not supported. "
-               "Supported algorithms: 'simple', 'gray_world', 'learned', 'ffcc', 'pca'");
+               "Supported algorithms: 'simple', 'gray_world', 'learned', 'ccc', 'pca'");
     }
 }
 

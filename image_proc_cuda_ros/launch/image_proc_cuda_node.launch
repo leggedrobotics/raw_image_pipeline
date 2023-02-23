@@ -26,10 +26,10 @@
   <arg name="cam6"                                 default="false"/>
   
   <!-- White balance options -->
-  <arg name="white_balance_method"                 default="ffcc"/> <!-- simple, grey_world, learned, ffcc, pca -->
+  <arg name="white_balance_method"                 default="ccc"/> <!-- simple, grey_world, learned, ccc, pca -->
   <arg name="white_balance_clipping_percentile"    default="20"/>   <!-- simple WB, values [0-100]-->
-  <arg name="white_balance_saturation_threshold"   default="0.8"/> <!-- grey_world, learned, ffcc, values [0.0, 1.0] -->
-  <arg name="white_balance_temporal_consistency"   default="true"/>  <!-- ffcc-only: uses a Kalman filter to track the illuminant estimate -->
+  <arg name="white_balance_saturation_threshold"   default="0.8"/> <!-- grey_world, learned, ccc, values [0.0, 1.0] -->
+  <arg name="white_balance_temporal_consistency"   default="true"/>  <!-- ccc-only: uses a Kalman filter to track the illuminant estimate -->
   <!-- Gamma correction options -->
   <arg name="gamma_correction_method"              default="custom"/> <!-- default, custom-->
   <arg name="gamma_correction_k"                   default="0.8"/> <!-- k >= 1 -> forward gamma correction; k < 1 -> inverse gamma-->

@@ -1,5 +1,5 @@
 /**
-@brief ffcc_node.cpp
+@brief image_proc_white_balance_node.cpp
 simple test node to control UV using rqt_reconfigure
 
 author: Matias Mattamala
@@ -11,31 +11,31 @@ author: Matias Mattamala
 #include <ros/package.h>  // to get the current directory of the package.
 
 #include <opencv2/opencv.hpp>
-#include <ffcc_catkin/ffcc.hpp>
+#include <image_proc_white_balance/convolutional_color_constancy.hpp>
 
 #include <ros/ros.h>
 
 #include <dynamic_reconfigure/server.h>
-#include <ffcc_catkin/FFCCCatkinConfig.h>
+#include <image_proc_white_balance/ImageProcWhiteBalanceConfig.h>
 
-class FfccRos
+class WhiteBalanceRos
 {
 public:
-    dynamic_reconfigure::Server<ffcc_catkin::FFCCCatkinConfig> server_;
-    dynamic_reconfigure::Server<ffcc_catkin::FFCCCatkinConfig>::CallbackType f_;
+    dynamic_reconfigure::Server<image_proc_white_balance::ImageProcWhiteBalanceConfig> server_;
+    dynamic_reconfigure::Server<image_proc_white_balance::ImageProcWhiteBalanceConfig>::CallbackType f_;
     std::string model_file_;
     std::string image_file_;
 		cv::Mat image_;
     cv::cuda::GpuMat image_d_;
-		std::unique_ptr<ffcc::FastFourierColorConstancyWB> wb_;
+		std::unique_ptr<image_proc_white_balance::ConvolutionalColorConstancyWB> wb_;
 
-    FfccRos(std::string model_file, std::string image_file)
+    WhiteBalanceRos(std::string model_file, std::string image_file)
     {
         model_file_ = model_file;
         image_file_ = image_file;
 
 				image_ = cv::imread(image_file_, cv::IMREAD_COLOR);
-				wb_ = std::make_unique<ffcc::FastFourierColorConstancyWB>(model_file_);
+				wb_ = std::make_unique<image_proc_white_balance::ConvolutionalColorConstancyWB>(model_file_);
 				wb_->setUV0(-1.421875);
         wb_->setDebug(true);
         image_d_.upload(image_);
@@ -49,11 +49,11 @@ public:
         cv::imshow("corrected", wb_image);
         cv::waitKey(10);
 
-				f_ = boost::bind(&FfccRos::callback, this, _1, _2);
+				f_ = boost::bind(&WhiteBalanceRos::callback, this, _1, _2);
         server_.setCallback(f_);
     }
 
-    void callback(ffcc_catkin::FFCCCatkinConfig &config, uint32_t level)
+    void callback(image_proc_white_balance::ImageProcWhiteBalanceConfig &config, uint32_t level)
     {
         wb_->setSaturationThreshold(config.saturation_threshold);
         wb_->setDebugUVOffset(config.Lu_offset, config.Lv_offset, config.uv0);
@@ -71,15 +71,15 @@ public:
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "ffcc_catkin");
+    ros::init(argc, argv, "image_proc_white_balance");
     ros::NodeHandle nh_priv("~");
-    std::string model_file = ros::package::getPath("ffcc_catkin") + "/model/default.bin";
-    std::string image_file = ros::package::getPath("ffcc_catkin") + "/data/alphasense.png";
+    std::string model_file = ros::package::getPath("image_proc_white_balance") + "/model/default.bin";
+    std::string image_file = ros::package::getPath("image_proc_white_balance") + "/data/alphasense.png";
 
     // Get input image path
     nh_priv.param<std::string>("image", image_file, image_file);
 
-    FfccRos wb(model_file, image_file);
+    WhiteBalanceRos wb(model_file, image_file);
 
     ROS_INFO("Spinning node");
     ros::spin();

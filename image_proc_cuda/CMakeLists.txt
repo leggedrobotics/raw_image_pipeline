@@ -6,7 +6,7 @@ set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wextra -O3 -DNDEBUG")
 
 set(PACKAGE_DEPENDENCIES
   eigen_conversions
-  ffcc_catkin
+  image_proc_white_balance
   pybind11_catkin
 )
 

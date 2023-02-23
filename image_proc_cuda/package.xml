@@ -14,8 +14,7 @@
   <depend>eigen_conversions</depend>
   <depend>nvidia-cuda</depend>
   <depend>nvidia-cuda-dev</depend>
-  <depend>ffcc_catkin</depend>
+  <depend>image_proc_white_balance</depend>
   <depend>pybind11_catkin</depend>
   
 </package>
-

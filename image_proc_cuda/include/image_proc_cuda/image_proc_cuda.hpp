@@ -15,7 +15,7 @@
 #include <npp.h>
 #include <yaml-cpp/yaml.h>
 
-#include <ffcc_catkin/ffcc.hpp>
+#include <image_proc_white_balance/convolutional_color_constancy.hpp>
 #include <image_proc_cuda/utils.hpp>
 
 namespace image_proc_cuda
@@ -156,7 +156,7 @@ private:
     void dumpGpuImage(const std::string& name, const cv::cuda::GpuMat& image);
 
     // Pointers
-    std::unique_ptr<ffcc::FastFourierColorConstancyWB> ffccWBPtr_;
+    std::unique_ptr<image_proc_white_balance::ConvolutionalColorConstancyWB> cccWBPtr_;
 
     // Pipeline options
     bool needs_rotation_;

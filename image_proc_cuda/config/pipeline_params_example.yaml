@@ -12,7 +12,7 @@ run_undistortion: true
 debayer_option: "auto"
 
 # White balance
-white_balance_method: "ffcc"
+white_balance_method: "ccc"
 white_balance_clipping_percentile: 20
 white_balance_saturation_threshold: 0.8
 white_balance_temporal_consistency: true

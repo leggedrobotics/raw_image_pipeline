@@ -9,7 +9,7 @@ import rospkg
 def main():
     # Load image
     rospack = rospkg.RosPack()
-    image_path = rospack.get_path("ffcc_catkin") + "/data/alphasense.png"
+    image_path = rospack.get_path("image_proc_white_balance") + "/data/alphasense.png"
     img = cv2.imread(image_path, cv2.IMREAD_ANYCOLOR)
 
     # Set config files
