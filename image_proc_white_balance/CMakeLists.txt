@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.1)
 project(image_proc_white_balance)
-set(CMAKE_CXX_STANDARD 14)
 
-set(CATKIN_PACKAGE_LIST
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wextra -O3 -DNDEBUG")
+
+set(PACKAGE_DEPENDENCIES
   roscpp
   roslib
   dynamic_reconfigure
@@ -10,7 +12,7 @@ set(CATKIN_PACKAGE_LIST
 
 find_package(catkin REQUIRED
     COMPONENTS
-    ${CATKIN_PACKAGE_LIST}
+    ${PACKAGE_DEPENDENCIES}
 )
 
 find_package(CUDA REQUIRED)
@@ -22,14 +24,14 @@ message("OpenCV version: ${OpenCV_Version}")
 message("OpenCV path: ${OpenCV_DIR}")
 
 generate_dynamic_reconfigure_options(
-  cfg/ImageProcWhiteBalance.cfg
+  cfg/image_proc_white_balance.cfg
 )
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS
-    ${CATKIN_PACKAGE_LIST}
+    ${PACKAGE_DEPENDENCIES}
   DEPENDS OpenCV
 )
 
