@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
-project(image_proc_white_balance)
-
+project(image_proc_white_balance CXX CUDA)
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wextra -O3 -DNDEBUG")
 
 set(PACKAGE_DEPENDENCIES
   roscpp
@@ -15,13 +13,17 @@ find_package(catkin REQUIRED
     ${PACKAGE_DEPENDENCIES}
 )
 
-find_package(CUDA REQUIRED)
-message("CUDA Version:" ${CUDA_VERSION_STRING})
-message("CUDA Path:" ${CUDA_DIR})
-
 find_package(OpenCV REQUIRED)
-message("OpenCV version: ${OpenCV_Version}")
-message("OpenCV path: ${OpenCV_DIR}")
+find_package(CUDA REQUIRED)
+
+if(${CUDA_FOUND})
+  add_definitions (-DHAS_CUDA)
+endif()
+
+message("CUDA found: " ${CUDA_FOUND})
+message("CUDA Version: " ${CUDA_VERSION_STRING})
+message("CUDA include dir: " ${CUDA_INCLUDE_DIRS})
+set(CUDA_nppicom_LIBRARY "")
 
 generate_dynamic_reconfigure_options(
   cfg/image_proc_white_balance.cfg
@@ -42,21 +44,30 @@ include_directories(
   ${OpenCV_INCLUDE_DIRS}
 )
 
-set(CUDA_LIBRARIES "-L/usr/local/cuda/lib64 -lcudart -lcuda -lcudadevrt")
-set(SYSTEM_LIBS "-L/usr/lib/aarch64-linux-gnu -L/usr/lib/aarch64-linux-gnu/tegra -lnppicc -lnppig -lnppial -lnppif -lnppist -lnppidei -lnpps -lnppisu")
-
 add_library(${PROJECT_NAME} SHARED
     src/image_proc_white_balance/convolutional_color_constancy.cpp
 )
 
+set(CUDA_npp_LIBRARIES
+  ${CUDA_nppc_LIBRARY}
+  ${CUDA_nppial_LIBRARY}
+  ${CUDA_nppicc_LIBRARY}
+  ${CUDA_nppidei_LIBRARY}
+  ${CUDA_nppif_LIBRARY}
+  ${CUDA_nppig_LIBRARY}
+  ${CUDA_nppim_LIBRARY}
+  ${CUDA_nppist_LIBRARY}
+  ${CUDA_nppisu_LIBRARY}
+  ${CUDA_nppitc_LIBRARY}
+  ${CUDA_npps_LIBRARY}
+)
 
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
-  ${CUDA_LIBRARIES}
-  ${STATIC_NVENC}
-  ${SYSTEM_LIBS}
+  ${CUDA_npp_LIBRARIES}  
   ${OpenCV_LIBRARIES}
 )
+
 
 # Add executable
 add_executable(${PROJECT_NAME}_node

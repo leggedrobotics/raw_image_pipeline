@@ -18,51 +18,48 @@ Author: Matias Mattamala
 #include <memory>
 
 // OpenCV
+#ifdef HAS_CUDA
 #include <opencv2/core/cuda.hpp>
 #include <opencv2/cudaarithm.hpp>
+#endif
+
 #include <opencv2/opencv.hpp>
 
 namespace image_proc_white_balance {
 class ConvolutionalColorConstancyWB {
  private:
   // Model
+  template<typename T>
   struct Model {
     int width_;
     int height_;
-    cv::Mat filter_;
-    cv::Mat bias_;
-  } model_;
+    T hist_;
+    T filter_;
+    T bias_;
+    T response_;
+    T hist_fft_;
+    T filter_fft_;
+    T bias_fft_;
+    T response_fft_;
+  };
+
+  Model<cv::Mat> model_;
+  #ifdef HAS_CUDA
+  Model<cv::cuda::GpuMat> gpu_model_;
+  #endif
 
   // Model filename
   std::string model_filename_;
 
-  // Histogram feature
-  int width;
-  int height;
-  cv::Mat image_histogram_;
-
-  // input image
-  // cv::cuda::GpuMat img_d;
-  cv::Size small_size_;
-
-  // histogram step
+  // Image histogram
   float bin_size_;
   float uv0_;
-
-  // Convolution variables (CUDA)
-  cv::cuda::GpuMat hist_d_;
-  cv::cuda::GpuMat filter_d_;
-  cv::cuda::GpuMat bias_d_;
-  cv::cuda::GpuMat response_fft_;
-  cv::cuda::GpuMat response_;
-  cv::cuda::GpuMat filter_fft_;
-  cv::cuda::GpuMat bias_fft_;
-  cv::cuda::GpuMat hist_fft_;
+  cv::Size small_size_;
 
   // Output variables
   cv::Point uv_pos_;
   cv::Point uv_pos_prev_;
-  float gain_r, gain_g, gain_b;
+  float gain_r_, gain_g_, gain_b_;
 
   // kalman filter use to smooth result
   cv::Mat kf_measurement_;
@@ -72,7 +69,8 @@ class ConvolutionalColorConstancyWB {
   std::shared_ptr<cv::KalmanFilter> kf_ptr_;
 
   // Parameters
-  float saturation_thr_;
+  float bright_thr_;
+  float dark_thr_;
   bool use_temporal_consistency_;
   bool debug_;
   bool debug_uv_offset_;
@@ -91,15 +89,24 @@ class ConvolutionalColorConstancyWB {
 
   // Calculate histogram of input image
   void calculateHistogramFeature(const cv::Mat& src, std::string out_name = "input");
-
-  // Computes the filter response to obtain the UV offset
-  int computeResponse();
-
+  
   // Enforces temporal consistency with a Kalman filter
   int kalmanFiltering();
 
+  // Compute gains
+  void computeGains();
+
+  // Computes the filter response to obtain the UV offset
+  int computeResponse();
+  // Apply gains
+  void applyGains(cv::Mat& image);
+
   // Compute and apply RGB gains
-  void applyWhiteBalance(cv::cuda::GpuMat& dst);
+  #ifdef HAS_CUDA
+  int computeResponseCuda();
+  void applyGainsCuda(cv::cuda::GpuMat& image);
+  #endif
+  
 
  public:
   ConvolutionalColorConstancyWB(const std::string& filename);
@@ -107,11 +114,14 @@ class ConvolutionalColorConstancyWB {
   ~ConvolutionalColorConstancyWB();
 
   // Applies white balance
+  #ifdef HAS_CUDA
   void balanceWhite(const cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst);
+  #endif
+  void balanceWhite(const cv::Mat& src, cv::Mat& dst);
 
   // Set threshold
   void resetTemporalConsistency();
-  void setSaturationThreshold(float threshold);
+  void setSaturationThreshold(float bright_thr, float dark_thr);
   void setTemporalConsistency(bool enable);
   void setUV0(float uv0);
   void setDebug(bool debug);

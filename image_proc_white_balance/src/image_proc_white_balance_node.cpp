@@ -35,18 +35,27 @@ public:
         image_file_ = image_file;
 
 				image_ = cv::imread(image_file_, cv::IMREAD_COLOR);
+        cv::imshow("original", image_);
+
 				wb_ = std::make_unique<image_proc_white_balance::ConvolutionalColorConstancyWB>(model_file_);
 				wb_->setUV0(-1.421875);
         wb_->setDebug(true);
         image_d_.upload(image_);
 
-				cv::Mat wb_image;
+        // CPU version
+        cv::Mat wb_image;
+        wb_->balanceWhite(image_, wb_image);
+
+        // GPU version
+				cv::Mat wb_image_gpu;
         cv::cuda::GpuMat wb_image_d_;
         wb_->balanceWhite(image_d_, wb_image_d_);
-        wb_image_d_.download(wb_image);
+        wb_image_d_.download(wb_image_gpu);
 
+        // Show
         cv::imshow("original", image_);
-        cv::imshow("corrected", wb_image);
+        cv::imshow("corrected_cpu", wb_image);
+        cv::imshow("corrected_gpu", wb_image_gpu);
         cv::waitKey(10);
 
 				f_ = boost::bind(&WhiteBalanceRos::callback, this, _1, _2);
@@ -55,16 +64,29 @@ public:
 
     void callback(image_proc_white_balance::ImageProcWhiteBalanceConfig &config, uint32_t level)
     {
-        wb_->setSaturationThreshold(config.saturation_threshold);
-        wb_->setDebugUVOffset(config.Lu_offset, config.Lv_offset, config.uv0);
+        wb_->setSaturationThreshold(config.bright_thr, config.dark_thr);
+        // wb_->setDebugUVOffset(config.Lu_offset, config.Lv_offset, config.uv0);
+        std::cout << "-- Updating parameters -- " << std::endl;
+        std::cout << "   bright_thr: " << config.bright_thr << std::endl;
+        std::cout << "   dark_thr:   " << config.dark_thr << std::endl;
+        std::cout << "   Lu_offset:  " << config.Lu_offset << std::endl;
+        std::cout << "   Lv_offset:  " << config.Lv_offset << std::endl;
+        std::cout << "   uv0:        " << config.uv0 << std::endl;
 
+        // CPU version
         cv::Mat wb_image;
+        wb_->balanceWhite(image_, wb_image);
+
+        // GPU verison
+				cv::Mat wb_image_gpu;
         cv::cuda::GpuMat wb_image_d_;
         wb_->balanceWhite(image_d_, wb_image_d_);
-        wb_image_d_.download(wb_image);
+        wb_image_d_.download(wb_image_gpu);
 
+        // Show
         cv::imshow("original", image_);
-        cv::imshow("corrected", wb_image);
+        cv::imshow("corrected_cpu", wb_image);
+        cv::imshow("corrected_gpu", wb_image_gpu);
         cv::waitKey(10);
     }
 };
