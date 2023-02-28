@@ -412,22 +412,8 @@ int ConvolutionalColorConstancyWB::computeResponseCuda() {
 }
 
 void ConvolutionalColorConstancyWB::applyGainsCuda(cv::cuda::GpuMat& image) {
-  Npp32f color_twist[3][4] = {{1.0, 0.0, 0.0, 0.0}, {0.0, 1.0, 0.0, 0.0}, {0.0, 0.0, 1.0, 0.0}};
-  bool is_rgb = false;
-  if (is_rgb) {
-    color_twist[0][0] = gain_r_;
-    color_twist[1][1] = gain_g_;
-    color_twist[2][2] = gain_b_;
-  } else {
-    color_twist[0][0] = gain_b_;
-    color_twist[1][1] = gain_g_;
-    color_twist[2][2] = gain_r_;
-  }
-
-  NppiSize image_size;
-  image_size.width = image.cols;
-  image_size.height = image.rows;
-  nppiColorTwist32f_8u_C3IR(image.data, static_cast<int>(image.step), image_size, color_twist);
+  cv::Scalar gains(gain_b_, gain_g_, gain_r_);
+  cv::cuda::multiply(image, gains, image);
 }
 #endif
 

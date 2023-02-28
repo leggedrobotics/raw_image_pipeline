@@ -87,11 +87,15 @@ void ImageProcCudaRos::setupROSparams()
                         << white_balance_clipping_percentile);
     image_proc_.setWhiteBalancePercentile(white_balance_clipping_percentile);
     
-    double white_balance_saturation_threshold;
-    if (!nh_private_.param<double>("white_balance_saturation_threshold",
-                           white_balance_saturation_threshold, 0.9))
-        ROS_WARN_STREAM("could not get 'white_balance_saturation_threshold', defaulting to: "
-                        << white_balance_saturation_threshold);
+    double white_balance_saturation_bright_thr, white_balance_saturation_dark_thr;
+    if (!nh_private_.param<double>("white_balance_saturation_bright_thr",
+                           white_balance_saturation_bright_thr, 0.9))
+        ROS_WARN_STREAM("could not get 'white_balance_saturation_bright_thr', defaulting to: "
+                        << white_balance_saturation_bright_thr);
+    if (!nh_private_.param<double>("white_balance_saturation_bright_thr",
+                           white_balance_saturation_bright_thr, 0.9))
+        ROS_WARN_STREAM("could not get 'white_balance_saturation_bright_thr', defaulting to: "
+                        << white_balance_saturation_bright_thr);
     image_proc_.setWhiteBalanceSaturationThreshold(white_balance_saturation_threshold);
 
     bool white_balance_temporal_consistency = false;

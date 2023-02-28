@@ -17,10 +17,6 @@ find_package(catkin REQUIRED
 # YAML-cpp
 find_package(yaml-cpp REQUIRED)
 
-find_package(CUDA REQUIRED)
-message("CUDA Version:" ${CUDA_VERSION_STRING})
-message("CUDA Path:" ${CUDA_DIR})
-
 find_package(Eigen3 REQUIRED)
 message("Eigen Version:" ${EIGEN3_VERSION_STRING})
 message("Eigen Path:" ${Eigen3_DIR})
@@ -28,6 +24,26 @@ message("Eigen Path:" ${Eigen3_DIR})
 find_package(OpenCV REQUIRED)
 message("OpenCV version: ${OpenCV_Version}")
 message("OpenCV path: ${OpenCV_DIR}")
+
+# Check if OpenCV was compiled with CUDA
+if(${OpenCV_CUDA_VERSION})
+  add_definitions (-DHAS_CUDA)
+  set(CUDA_npp_LIBRARIES
+    ${CUDA_nppc_LIBRARY}
+    ${CUDA_nppial_LIBRARY}
+    ${CUDA_nppicc_LIBRARY}
+    ${CUDA_nppidei_LIBRARY}
+    ${CUDA_nppif_LIBRARY}
+    ${CUDA_nppig_LIBRARY}
+    ${CUDA_nppim_LIBRARY}
+    ${CUDA_nppist_LIBRARY}
+    ${CUDA_nppisu_LIBRARY}
+    ${CUDA_nppitc_LIBRARY}
+    ${CUDA_npps_LIBRARY}
+  )
+else()
+  set(CUDA_npp_LIBRARIES "")
+endif()
 
 catkin_package(
   INCLUDE_DIRS include
@@ -43,22 +59,24 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  ${CUDA_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
 )
 
-set(CUDA_LIBRARIES "-L/usr/local/cuda/lib64 -lcudart -lcuda -lcudadevrt")
-set(SYSTEM_LIBS "-L/usr/lib/aarch64-linux-gnu -L/usr/lib/aarch64-linux-gnu/tegra -lnppicc -lnppig -lnppial -lnppif -lnppist -lnppidei -lnpps -lnppisu")
-
 add_library(${PROJECT_NAME} SHARED
-    src/image_proc_cuda.cpp
+  src/image_proc_cuda/modules/color_calibration.cpp
+  src/image_proc_cuda/modules/color_enhancer.cpp
+  src/image_proc_cuda/modules/debayer.cpp
+  src/image_proc_cuda/modules/flip.cpp
+  src/image_proc_cuda/modules/gamma_correction.cpp
+  src/image_proc_cuda/modules/undistortion.cpp
+  src/image_proc_cuda/modules/vignetting_correction.cpp
+  src/image_proc_cuda/modules/white_balance.cpp
+  src/image_proc_cuda/image_proc_cuda.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
     ${catkin_LIBRARIES}
-    ${CUDA_LIBRARIES}
-    ${STATIC_NVENC}
-    ${SYSTEM_LIBS}
+    ${CUDA_npp_LIBRARIES}
     ${OpenCV_LIBS}
     ${YAML_CPP_LIBRARIES}
 )
