@@ -12,7 +12,7 @@ int main(int argc, char** argv)
 
   image_proc_cuda::ImageProcCudaRos image_proc(nh, nh_priv);
 
-  image_proc.setupROSparams();
+  image_proc.setupRosParams();
   image_proc.setupSubAndPub();
 
   // Spin

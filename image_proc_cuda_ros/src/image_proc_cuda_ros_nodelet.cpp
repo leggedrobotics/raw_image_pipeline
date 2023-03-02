@@ -17,7 +17,7 @@ class ImageProcCudaNodelet : public nodelet::Nodelet {
 
       image_proc_ = std::make_shared<image_proc_cuda::ImageProcCudaRos>(nh_, nh_private_);
 
-      image_proc_->setupROSparams();
+      image_proc_->setupRosParams();
       image_proc_->setupSubAndPub();
     }
 

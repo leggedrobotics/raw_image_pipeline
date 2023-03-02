@@ -19,7 +19,7 @@ bool ImageProcCudaRos::run() {
   return true;
 }
 
-void ImageProcCudaRos::setupROSparams() {
+void ImageProcCudaRos::setupRosParams() {
   // Topic options
   readRequiredParameter("input_topic", input_topic_);
   readRequiredParameter("output_topic", output_topic_);
@@ -34,7 +34,7 @@ void ImageProcCudaRos::setupROSparams() {
 
   bool use_gpu = readParameter("use_gpu", true);
   image_proc_.setGpu(use_gpu);
-  
+
   // Debayer
   bool run_debayer = readParameter("debayer/enabled", true);
   image_proc_.setDebayer(run_debayer);

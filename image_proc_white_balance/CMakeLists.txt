@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
-project(image_proc_white_balance CXX)
+project(image_proc_white_balance)
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wextra -O3 -DNDEBUG")
 
 set(PACKAGE_DEPENDENCIES
   roscpp

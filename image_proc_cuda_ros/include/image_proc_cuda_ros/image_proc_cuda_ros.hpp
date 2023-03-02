@@ -25,7 +25,7 @@ class ImageProcCudaRos {
 
   // Setup methods
   void setupSubAndPub();
-  void setupROSparams();
+  void setupRosParams();
 
   // Starts the node
   bool run();
@@ -62,6 +62,7 @@ class ImageProcCudaRos {
 
   template <typename T>
   T readParameter(const std::string& param, T default_value) {
+    std::cout << param << ": " << default_value << std::endl;
     T value;
     if (!nh_private_.param<T>(param, value, default_value)) {
       ROS_WARN_STREAM("could not get [" << param << "], defaulting to: " << value);

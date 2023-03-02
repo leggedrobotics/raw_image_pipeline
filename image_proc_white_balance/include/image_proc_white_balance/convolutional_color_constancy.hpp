@@ -17,12 +17,12 @@ Author: Matias Mattamala
 #include <memory>
 
 // OpenCV
+#include <opencv2/opencv.hpp>
+
 #ifdef HAS_CUDA
 #include <opencv2/core/cuda.hpp>
 #include <opencv2/cudaarithm.hpp>
 #endif
-
-#include <opencv2/opencv.hpp>
 
 namespace image_proc_white_balance {
 class ConvolutionalColorConstancyWB {
