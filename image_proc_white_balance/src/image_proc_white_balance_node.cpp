@@ -26,8 +26,12 @@ public:
     std::string model_file_;
     std::string image_file_;
 		cv::Mat image_;
+
+    #ifdef HAS_CUDA
     cv::cuda::GpuMat image_d_;
-		std::unique_ptr<image_proc_white_balance::ConvolutionalColorConstancyWB> wb_;
+    #endif
+
+		std::shared_ptr<image_proc_white_balance::ConvolutionalColorConstancyWB> wb_;
 
     WhiteBalanceRos(std::string model_file, std::string image_file)
     {
@@ -37,25 +41,28 @@ public:
 				image_ = cv::imread(image_file_, cv::IMREAD_COLOR);
         cv::imshow("original", image_);
 
-				wb_ = std::make_unique<image_proc_white_balance::ConvolutionalColorConstancyWB>(model_file_);
+				wb_ = std::make_shared<image_proc_white_balance::ConvolutionalColorConstancyWB>(model_file_);
 				wb_->setUV0(-1.421875);
         wb_->setDebug(true);
-        image_d_.upload(image_);
-
+        
         // CPU version
         cv::Mat wb_image;
         wb_->balanceWhite(image_, wb_image);
 
         // GPU version
-				cv::Mat wb_image_gpu;
+				#ifdef HAS_CUDA
+        image_d_.upload(image_);
+        cv::Mat wb_image_gpu;
         cv::cuda::GpuMat wb_image_d_;
         wb_->balanceWhite(image_d_, wb_image_d_);
         wb_image_d_.download(wb_image_gpu);
+        cv::imshow("corrected_gpu", wb_image_gpu);
+        #endif
 
         // Show
         cv::imshow("original", image_);
         cv::imshow("corrected_cpu", wb_image);
-        cv::imshow("corrected_gpu", wb_image_gpu);
+        
         cv::waitKey(10);
 
 				f_ = boost::bind(&WhiteBalanceRos::callback, this, _1, _2);
@@ -77,16 +84,19 @@ public:
         cv::Mat wb_image;
         wb_->balanceWhite(image_, wb_image);
 
-        // GPU verison
+        // GPU version
+        #ifdef HAS_CUDA
 				cv::Mat wb_image_gpu;
         cv::cuda::GpuMat wb_image_d_;
         wb_->balanceWhite(image_d_, wb_image_d_);
         wb_image_d_.download(wb_image_gpu);
+        cv::imshow("corrected_gpu", wb_image_gpu);
+        #endif
 
         // Show
         cv::imshow("original", image_);
         cv::imshow("corrected_cpu", wb_image);
-        cv::imshow("corrected_gpu", wb_image_gpu);
+        
         cv::waitKey(10);
     }
 };
@@ -96,7 +106,7 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "image_proc_white_balance");
     ros::NodeHandle nh_priv("~");
     std::string model_file = ros::package::getPath("image_proc_white_balance") + "/model/default.bin";
-    std::string image_file = ros::package::getPath("image_proc_white_balance") + "/data/alphasense.png";
+    std::string image_file = ros::package::getPath("image_proc_white_balance") + "/data/alphasense2.png";
 
     // Get input image path
     nh_priv.param<std::string>("image", image_file, image_file);

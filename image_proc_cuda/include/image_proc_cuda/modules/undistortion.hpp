@@ -25,6 +25,10 @@ class UndistortionModule {
   // Setters
   //-----------------------------------------------------------------------------
   void setImageSize(int width, int height);
+  void setNewImageSize(int width, int height);
+  void setBalance(double balance);
+  void setFovScale(double fov_scale);
+
   void setCameraMatrix(const std::vector<double>& camera_matrix);
   void setDistortionCoefficients(const std::vector<double>& coefficients);
   void setDistortionModel(const std::string& model);
@@ -34,41 +38,58 @@ class UndistortionModule {
   //-----------------------------------------------------------------------------
   // Getters
   //-----------------------------------------------------------------------------
-  int getImageHeight() const;
-  int getImageWidth() const;
-  std::string getDistortionModel() const;
-  cv::Mat getCameraMatrix() const;
-  cv::Mat getDistortionCoefficients() const;
-  cv::Mat getRectificationMatrix() const;
-  cv::Mat getProjectionMatrix() const;
-  std::vector<double> getColorCalibrationMatrix() const;
+  int getDistImageHeight() const;
+  int getDistImageWidth() const;
+  std::string getDistDistortionModel() const;
+  cv::Mat getDistCameraMatrix() const;
+  cv::Mat getDistDistortionCoefficients() const;
+  cv::Mat getDistRectificationMatrix() const;
+  cv::Mat getDistProjectionMatrix() const;
 
-  std::string getOriginalDistortionModel() const;
-  cv::Mat getOriginalCameraMatrix() const;
-  cv::Mat getOriginalDistortionCoefficients() const;
-  cv::Mat getOriginalRectificationMatrix() const;
-  cv::Mat getOriginalProjectionMatrix() const;
+  int getRectImageHeight() const;
+  int getRectImageWidth() const;
+  std::string getRectDistortionModel() const;
+  cv::Mat getRectCameraMatrix() const;
+  cv::Mat getRectDistortionCoefficients() const;
+  cv::Mat getRectRectificationMatrix() const;
+  cv::Mat getRectProjectionMatrix() const;
 
-  cv::Mat getDistortedImage() const;
+  cv::Mat getDistImage() const;
+  cv::Mat getRectMask() const;
 
   //-----------------------------------------------------------------------------
   // Main interface
   //-----------------------------------------------------------------------------
   template <typename T>
-  bool apply(T& image);
+  bool apply(T& image, std::string& encoding) {
+    saveUndistortedImage(image);
+    if (!enabled_) {
+      return false;
+    }
+    if (!calibration_available_) {
+      std::cout << "No calibration available!" << std::endl;
+      return false;
+    }
+    if (dist_distortion_model_ != "none") {
+      undistort(image);
+    }
+    return true;
+  }
 
   //-----------------------------------------------------------------------------
   // Helper methods (CPU)
   //-----------------------------------------------------------------------------
  public:
   void loadCalibration(const std::string& file_path);
+  void init();
 
  private:
-  void initRectifyMap();
-
   void undistort(cv::Mat& image);
+  void saveUndistortedImage(cv::Mat& image);
+
 #ifdef HAS_CUDA
   void undistort(cv::cuda::GpuMat& image);
+  void saveUndistortedImage(cv::cuda::GpuMat& image);
 #endif
 
   //-----------------------------------------------------------------------------
@@ -78,20 +99,25 @@ class UndistortionModule {
 
   // Calibration & undistortion
   bool calibration_available_;
-  std::string distortion_model_;
 
   // Original - "distorted" parameters
-  cv::Matx33d camera_matrix_;
-  cv::Matx14d distortion_coeff_;
-  cv::Matx33d rectification_matrix_;
-  cv::Matx34d projection_matrix_;
+  std::string dist_distortion_model_;
+  cv::Matx33d dist_camera_matrix_;
+  cv::Matx14d dist_distortion_coeff_;
+  cv::Matx33d dist_rectification_matrix_;
+  cv::Matx34d dist_projection_matrix_;
+  cv::Size dist_image_size_;
 
   // Undistorted parameters
-  cv::Matx33d undistorted_camera_matrix_;
-  cv::Matx14d undistorted_distortion_coeff_;
-  cv::Matx33d undistorted_rectification_matrix_;
-  cv::Matx34d undistorted_projection_matrix_;
-  cv::Size image_size_;
+  std::string rect_distortion_model_;
+  cv::Matx33d rect_camera_matrix_;
+  cv::Matx14d rect_distortion_coeff_;
+  cv::Matx33d rect_rectification_matrix_;
+  cv::Matx34d rect_projection_matrix_;
+  cv::Size rect_image_size_;
+
+  double rect_balance_;
+  double rect_fov_scale_;
 
   cv::Mat undistortion_map_x_;
   cv::Mat undistortion_map_y_;
@@ -101,8 +127,9 @@ class UndistortionModule {
   cv::cuda::GpuMat gpu_undistortion_map_y_;
 #endif
 
-  // Distorted image
-  cv::Mat original_image_;
+  // Original image
+  cv::Mat dist_image_;
+  cv::Mat rect_mask_;
 };
 
 }  // namespace image_proc_cuda

@@ -21,7 +21,13 @@ class FlipModule {
   // Main interface
   //-----------------------------------------------------------------------------
   template <typename T>
-  bool apply(T& image);
+  bool apply(T& image, std::string& encoding) {
+    if (!enabled_) {
+      return false;
+    }
+    flip(image);
+    return true;
+  }
 
   //-----------------------------------------------------------------------------
   // Helper methods (CPU)

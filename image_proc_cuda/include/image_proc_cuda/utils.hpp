@@ -49,15 +49,17 @@ namespace utils {
 // Wrapper for yaml-cpp to provide default values if value is not found
 template <typename T>
 T get(const YAML::Node& node, const std::string& param, const T& default_value) {
+  T out;
   try {
     if (!node[param]) {
-      return default_value;
+      out = default_value;
     }
-
-    return node[param].as<T>();
+    out = node[param].as<T>();
   } catch (const YAML::InvalidNode::Exception& e) {
-    return default_value;
+    out = default_value;
   }
+  // std::cout << "Reading parameter [" << param << "]: " << std::endl;
+  return out;
 }
 
 // Convert mat to std vector

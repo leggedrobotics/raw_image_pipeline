@@ -26,7 +26,16 @@ class DebayerModule {
   // Main interface
   //-----------------------------------------------------------------------------
   template <typename T>
-  bool apply(T& image);
+  bool apply(T& image, std::string& encoding) {
+    if (!enabled_) {
+      return false;
+    }
+    // Check encoding
+    std::string input_encoding = encoding_ == "auto" ? encoding : encoding_;
+    // Run debayer
+    debayer(image, encoding);
+    return true;
+  }
 
   //-----------------------------------------------------------------------------
   // Helper methods (CPU)
@@ -34,9 +43,9 @@ class DebayerModule {
  private:
   bool isBayerEncoding(const std::string& encoding) const;
 
-  void debayer(cv::Mat& image);
+  void debayer(cv::Mat& image, std::string& encoding);
 #ifdef HAS_CUDA
-  void debayer(cv::cuda::GpuMat& image);
+  void debayer(cv::cuda::GpuMat& image, std::string& encoding);
 #endif
 
   //-----------------------------------------------------------------------------

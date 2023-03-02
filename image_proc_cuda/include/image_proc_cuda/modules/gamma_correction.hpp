@@ -27,7 +27,17 @@ class GammaCorrectionModule {
   // Main interface
   //-----------------------------------------------------------------------------
   template <typename T>
-  bool apply(T& image);
+  bool apply(T& image, std::string& encoding) {
+    if (!enabled_) {
+      return false;
+    }
+    if (method_ == "custom") {
+      gammaCorrectCustom(image);
+    } else {
+      gammaCorrectDefault(image);
+    }
+    return true;
+  }
 
   //-----------------------------------------------------------------------------
   // Wrapper methods (CPU)

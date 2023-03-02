@@ -2,18 +2,20 @@
 
 #include <boost/filesystem.hpp>
 #define FILE_FOLDER (boost::filesystem::path(__FILE__).parent_path().string())
-#define DEFAULT_PARAMS_PATH (FILE_FOLDER + "/../config/pipeline_params_example.yaml")
+#define DEFAULT_CALIBRATION_PATH (FILE_FOLDER + "/../../config/pipeline_params_example.yaml")
+#define DEFAULT_COLOR_CALIBRATION_PATH (FILE_FOLDER + "/../../config/alphasense_color_calib_example.yaml")
 
 namespace image_proc_cuda {
 
-ImageProcCuda::ImageProcCuda(const std::string& params_path, const std::string& calibration_path,
-                             const std::string& color_calibration_path)
+ImageProcCuda::ImageProcCuda(const std::string& params_path, const std::string& calibration_path, const std::string& color_calibration_path,
+                             bool use_gpu)
     :  // Debug
+      use_gpu_(use_gpu),
       dump_images_(false),
       idx_(0) {
   // Load parameters
   if (params_path.empty())
-    loadParams(DEFAULT_PARAMS_PATH);
+    loadParams(DEFAULT_CALIBRATION_PATH);
   else
     loadParams(params_path);
 
@@ -22,7 +24,7 @@ ImageProcCuda::ImageProcCuda(const std::string& params_path, const std::string& 
 
   // Load color calibration
   if (color_calibration_path.empty())
-    color_calibrator_.loadCalibration(DEFAULT_PARAMS_PATH);
+    color_calibrator_.loadCalibration(DEFAULT_COLOR_CALIBRATION_PATH);
   else
     color_calibrator_.loadCalibration(color_calibration_path);
 }
@@ -40,6 +42,7 @@ void ImageProcCuda::loadParams(const std::string& file_path) {
     // Pipeline options
     // Debayer Params
     {
+      std::cout << "Loading debayer params" << std::endl;
       bool enabled = utils::get(node["debayer"], "enabled", true);
       std::string encoding = utils::get<std::string>(node["debayer"], "encoding", "auto");
       debayer_.enable(enabled);
@@ -48,13 +51,15 @@ void ImageProcCuda::loadParams(const std::string& file_path) {
 
     // Flip params
     {
+      std::cout << "Loading flip params" << std::endl;
       bool enabled = utils::get(node["flip"], "enabled", false);
       flipper_.enable(enabled);
     }
 
     // White balance params
     {
-      bool enabled = utils::get(node, "enabled", false);
+      std::cout << "Loading white_balance params" << std::endl;
+      bool enabled = utils::get(node["white_balance"], "enabled", false);
       std::string method = utils::get<std::string>(node["white_balance"], "method", "ccc");
       double clipping_percentile = utils::get(node["white_balance"], "clipping_percentile", 20.0);
       double saturation_bright_thr = utils::get(node["white_balance"], "saturation_bright_thr", 0.8);
@@ -63,19 +68,21 @@ void ImageProcCuda::loadParams(const std::string& file_path) {
 
       white_balancer_.enable(enabled);
       white_balancer_.setMethod(method);
-      white_balancer_.setSaturationPercentile(enabled);
+      white_balancer_.setSaturationPercentile(clipping_percentile);
       white_balancer_.setSaturationThreshold(saturation_bright_thr, saturation_dark_thr);
       white_balancer_.setTemporalConsistency(temporal_consistency);
     }
 
     // Color calibration
     {
+      std::cout << "Loading color_calibration params" << std::endl;
       bool enabled = utils::get(node["color_calibration"], "enabled", false);
       color_calibrator_.enable(enabled);
     }
 
     // Gamma correction params
     {
+      std::cout << "Loading gamma_correction params" << std::endl;
       bool enabled = utils::get(node["gamma_correction"], "enabled", false);
       std::string method = utils::get<std::string>(node["gamma_correction"], "method", "custom");
       double k = utils::get(node["gamma_correction"], "k", 0.8);
@@ -87,6 +94,7 @@ void ImageProcCuda::loadParams(const std::string& file_path) {
 
     // Vignetting correction
     {
+      std::cout << "Loading vignetting_correction params" << std::endl;
       bool enabled = utils::get(node["vignetting_correction"], "enabled", false);
       double scale = utils::get(node["vignetting_correction"], "scale", 1.5);
       double a2 = utils::get(node["vignetting_correction"], "a2", 1e-3);
@@ -98,6 +106,7 @@ void ImageProcCuda::loadParams(const std::string& file_path) {
 
     // Color enhancer
     {
+      std::cout << "Loading color_enhancer params" << std::endl;
       bool enabled = utils::get(node["color_enhancer"], "run_color_enhancer", false);
       double hue_gain = utils::get(node["color_enhancer"], "hue_gain", 1.0);
       double saturation_gain = utils::get(node["color_enhancer"], "saturation_gain", 1.0);
@@ -111,8 +120,14 @@ void ImageProcCuda::loadParams(const std::string& file_path) {
 
     // Undistortion
     {
+      std::cout << "Loading undistortion params" << std::endl;
       bool enabled = utils::get(node["undistortion"], "enabled", false);
+      double balance = utils::get(node["undistortion"], "balance", 0.0);
+      double fov_scale = utils::get(node["undistortion"], "fov_scale", 1.0);
+
       undistorter_.enable(enabled);
+      undistorter_.setBalance(balance);
+      undistorter_.setFovScale(fov_scale);
     }
 
   } else {
@@ -123,7 +138,19 @@ void ImageProcCuda::loadParams(const std::string& file_path) {
 //-----------------------------------------------------------------------------
 // Main interfaces
 //-----------------------------------------------------------------------------
-cv::Mat ImageProcCuda::process(const cv::Mat& image, const std::string& encoding) {
+void ImageProcCuda::loadCameraCalibration(const std::string& file_path) {
+  undistorter_.loadCalibration(file_path);
+}
+
+void ImageProcCuda::loadColorCalibration(const std::string& file_path) {
+  color_calibrator_.loadCalibration(file_path);
+}
+
+void ImageProcCuda::initUndistortion() {
+  undistorter_.init();
+}
+
+cv::Mat ImageProcCuda::process(const cv::Mat& image, std::string& encoding) {
   cv::Mat out = image.clone();
   // Apply pipeline
   apply(out, encoding);
@@ -131,18 +158,18 @@ cv::Mat ImageProcCuda::process(const cv::Mat& image, const std::string& encoding
   return out.clone();
 }
 
-bool ImageProcCuda::apply(cv::Mat& image, const std::string& encoding) {
+bool ImageProcCuda::apply(cv::Mat& image, std::string& encoding) {
   if (use_gpu_) {
 #ifdef HAS_CUDA
     cv::cuda::GpuMat image_d;
     image_d.upload(image);
-    pipeline(image_d);
+    pipeline(image_d, encoding);
     image_d.download(image);
 #else
-    throw std::invalid_argument("use_gpu=true but the image_proc_cuda was not compiled with CUDA support");
+    throw std::invalid_argument("use_gpu=true but image_proc_cuda was not compiled with CUDA support");
 #endif
   } else {
-    pipeline(image);
+    pipeline(image, encoding);
   }
 
   // Increase counter
@@ -151,29 +178,28 @@ bool ImageProcCuda::apply(cv::Mat& image, const std::string& encoding) {
   return true;
 }
 
-template <typename T>
-void ImageProcCuda::pipeline(T& image) {
-  // Run pipeline
-  debayer_.apply(image);
-  flipper_.apply(image);
-  white_balancer_.apply(image);
-  color_calibrator_.apply(image);
-  gamma_corrector_.apply(image);
-  vignetting_corrector_.apply(image);
-  color_enhancer_.apply(image);
-  undistorter_.apply(image);
-}
-
 //-----------------------------------------------------------------------------
 // Misc interfaces
 //-----------------------------------------------------------------------------
+void ImageProcCuda::setGpu(bool use_gpu) {
+  use_gpu_ = use_gpu;
+}
+
 void ImageProcCuda::resetWhiteBalanceTemporalConsistency() {
   white_balancer_.resetTemporalConsistency();
 }
 
-cv::Mat ImageProcCuda::getDistortedImage() const {
-  return undistorter_.getDistortedImage();
+cv::Mat ImageProcCuda::getDistImage() const {
+  return undistorter_.getDistImage();
 }
+
+cv::Mat ImageProcCuda::getRectMask() const {
+  return undistorter_.getRectMask();
+}
+
+//-----------------------------------------------------------------------------
+// Setters
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 // Debayer
@@ -287,6 +313,17 @@ void ImageProcCuda::setUndistortionImageSize(int width, int height) {
   undistorter_.setImageSize(width, height);
 }
 
+void ImageProcCuda::setUndistortionNewImageSize(int width, int height) {
+  undistorter_.setNewImageSize(width, height);
+}
+
+void ImageProcCuda::setUndistortionBalance(double balance) {
+  undistorter_.setBalance(balance);
+}
+void ImageProcCuda::setUndistortionFovScale(double fov_scale) {
+  undistorter_.setFovScale(fov_scale);
+}
+
 void ImageProcCuda::setUndistortionCameraMatrix(const std::vector<double>& camera_matrix) {
   undistorter_.setCameraMatrix(camera_matrix);
 }
@@ -307,51 +344,98 @@ void ImageProcCuda::setUndistortionProjectionMatrix(const std::vector<double>& p
   undistorter_.setProjectionMatrix(projection_matrix);
 }
 
-int ImageProcCuda::getImageHeight() const {
-  return undistorter_.getImageHeight();
+//-----------------------------------------------------------------------------
+// Undistortion getters
+//-----------------------------------------------------------------------------
+bool ImageProcCuda::isDebayerEnabled() const {
+  return debayer_.enabled();
 }
 
-int ImageProcCuda::getImageWidth() const {
-  return undistorter_.getImageWidth();
+bool ImageProcCuda::isFlipEnabled() const {
+  return flipper_.enabled();
 }
 
-std::string ImageProcCuda::getDistortionModel() const {
-  return undistorter_.getDistortionModel();
-}
-std::string ImageProcCuda::getOriginalDistortionModel() const {
-  return undistorter_.getOriginalDistortionModel();
+bool ImageProcCuda::isWhiteBalanceEnabled() const {
+  return white_balancer_.enabled();
 }
 
-cv::Mat ImageProcCuda::getCameraMatrix() const {
-  return undistorter_.getCameraMatrix();
+bool ImageProcCuda::isColorCalibrationEnabled() const {
+  return color_calibrator_.enabled();
 }
 
-cv::Mat ImageProcCuda::getOriginalCameraMatrix() const {
-  return undistorter_.getOriginalCameraMatrix();
+bool ImageProcCuda::isGammaCorrectionEnabled() const {
+  return gamma_corrector_.enabled();
 }
 
-cv::Mat ImageProcCuda::getDistortionCoefficients() const {
-  return undistorter_.getDistortionCoefficients();
+bool ImageProcCuda::isVignettingCorrectionEnabled() const {
+  return vignetting_corrector_.enabled();
 }
 
-cv::Mat ImageProcCuda::getOriginalDistortionCoefficients() const {
-  return undistorter_.getOriginalDistortionCoefficients();
+bool ImageProcCuda::isColorEnhancerEnabled() const {
+  return color_enhancer_.enabled();
 }
 
-cv::Mat ImageProcCuda::getRectificationMatrix() const {
-  return undistorter_.getRectificationMatrix();
+bool ImageProcCuda::isUndistortionEnabled() const {
+  return undistorter_.enabled();
 }
 
-cv::Mat ImageProcCuda::getOriginalRectificationMatrix() const {
-  return undistorter_.getOriginalRectificationMatrix();
+//-----------------------------------------------------------------------------
+// Undistortion getters
+//-----------------------------------------------------------------------------
+
+int ImageProcCuda::getRectImageHeight() const {
+  return undistorter_.getRectImageHeight();
 }
 
-cv::Mat ImageProcCuda::getProjectionMatrix() const {
-  return undistorter_.getProjectionMatrix();
+int ImageProcCuda::getRectImageWidth() const {
+  return undistorter_.getRectImageWidth();
 }
 
-cv::Mat ImageProcCuda::getOriginalProjectionMatrix() const {
-  return undistorter_.getOriginalProjectionMatrix();
+int ImageProcCuda::getDistImageHeight() const {
+  return undistorter_.getDistImageHeight();
+}
+
+int ImageProcCuda::getDistImageWidth() const {
+  return undistorter_.getDistImageWidth();
+}
+
+std::string ImageProcCuda::getRectDistortionModel() const {
+  return undistorter_.getRectDistortionModel();
+}
+std::string ImageProcCuda::getDistDistortionModel() const {
+  return undistorter_.getDistDistortionModel();
+}
+
+cv::Mat ImageProcCuda::getRectCameraMatrix() const {
+  return undistorter_.getRectCameraMatrix();
+}
+
+cv::Mat ImageProcCuda::getDistCameraMatrix() const {
+  return undistorter_.getDistCameraMatrix();
+}
+
+cv::Mat ImageProcCuda::getRectDistortionCoefficients() const {
+  return undistorter_.getRectDistortionCoefficients();
+}
+
+cv::Mat ImageProcCuda::getDistDistortionCoefficients() const {
+  return undistorter_.getDistDistortionCoefficients();
+}
+
+cv::Mat ImageProcCuda::getRectRectificationMatrix() const {
+  return undistorter_.getRectRectificationMatrix();
+}
+
+cv::Mat ImageProcCuda::getDistRectificationMatrix() const {
+  return undistorter_.getDistRectificationMatrix();
+}
+
+cv::Mat ImageProcCuda::getRectProjectionMatrix() const {
+  return undistorter_.getRectProjectionMatrix();
+}
+
+cv::Mat ImageProcCuda::getDistProjectionMatrix() const {
+  return undistorter_.getDistProjectionMatrix();
 }
 
 // void ImageProcCuda::dumpGpuImage(const std::string& name, const cv::cuda::GpuMat& image) {

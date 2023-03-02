@@ -14,10 +14,6 @@ find_package(catkin REQUIRED
     ${PACKAGE_DEPENDENCIES}
 )
 
-find_package(CUDA REQUIRED)
-message("CUDA Version:" ${CUDA_VERSION_STRING})
-message("CUDA Path:" ${CUDA_DIR})
-
 catkin_package(
   LIBRARIES
   CATKIN_DEPENDS

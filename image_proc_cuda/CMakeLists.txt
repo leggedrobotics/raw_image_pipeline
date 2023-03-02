@@ -28,6 +28,7 @@ message("OpenCV path: ${OpenCV_DIR}")
 # Check if OpenCV was compiled with CUDA
 if(${OpenCV_CUDA_VERSION})
   add_definitions (-DHAS_CUDA)
+  find_package(CUDA)
   set(CUDA_npp_LIBRARIES
     ${CUDA_nppc_LIBRARY}
     ${CUDA_nppial_LIBRARY}
@@ -43,6 +44,7 @@ if(${OpenCV_CUDA_VERSION})
   )
 else()
   set(CUDA_npp_LIBRARIES "")
+  set(CUDA_INCLUDE_DIRS "")
 endif()
 
 catkin_package(
@@ -51,7 +53,6 @@ catkin_package(
   CATKIN_DEPENDS
     ${PACKAGE_DEPENDENCIES}
   DEPENDS
-    Eigen3
     OpenCV
     YAML_CPP
 )
@@ -60,6 +61,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
+  ${CUDA_INCLUDE_DIRS}
 )
 
 add_library(${PROJECT_NAME} SHARED

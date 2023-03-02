@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include <opencv2/opencv.hpp>
-#include <image_proc_cuda/utils.hpp>
-#include <boost/filesystem.hpp>
 #include <yaml-cpp/yaml.h>
+#include <boost/filesystem.hpp>
+#include <image_proc_cuda/utils.hpp>
+#include <opencv2/opencv.hpp>
 
 #ifdef HAS_CUDA
 #include <npp.h>
@@ -35,12 +35,25 @@ class ColorCalibrationModule {
   // Main interface
   //-----------------------------------------------------------------------------
   template <typename T>
-  bool apply(T& image);
+  bool apply(T& image, std::string& encoding) {
+    if (!enabled_) {
+      return false;
+    }
+    if (image.channels() != 3) {
+      return false;
+    }
+    if (!calibration_available_) {
+      std::cout << "No calibration available!" << std::endl;
+      return false;
+    }
+    colorCorrection(image);
+    return true;
+  }
 
   //-----------------------------------------------------------------------------
   // Helper methods (CPU)
   //-----------------------------------------------------------------------------
-public:
+ public:
   void loadCalibration(const std::string& file_path);
 
  private:
@@ -58,12 +71,11 @@ public:
 
   // Calibration & undistortion
   bool calibration_available_;
-  cv::Matx33d color_calibration_matrix_;
+  cv::Matx33f color_calibration_matrix_;
 
 #ifdef HAS_CUDA
   Npp32f gpu_color_calibration_matrix_[3][4] = {{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}};
 #endif
-
 };
 
 }  // namespace image_proc_cuda

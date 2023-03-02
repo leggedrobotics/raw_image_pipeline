@@ -9,7 +9,7 @@ WhiteBalanceModule::WhiteBalanceModule(const std::string& method) {
   method_ = method;
 
   if (method_ == "ccc") {
-    cccWBPtr_ = std::make_unique<image_proc_white_balance::ConvolutionalColorConstancyWB>();
+    cccWBPtr_ = std::make_shared<image_proc_white_balance::ConvolutionalColorConstancyWB>();
   }
 }
 
@@ -17,11 +17,18 @@ void WhiteBalanceModule::enable(bool enabled) {
   enabled_ = enabled;
 }
 
+bool WhiteBalanceModule::enabled() const {
+  return enabled_;
+}
+
 //-----------------------------------------------------------------------------
 // Setters
 //-----------------------------------------------------------------------------
 void WhiteBalanceModule::setMethod(const std::string& method) {
   method_ = method;
+  if (method_ == "ccc") {
+    cccWBPtr_ = std::make_shared<image_proc_white_balance::ConvolutionalColorConstancyWB>();
+  }
 }
 
 void WhiteBalanceModule::setSaturationPercentile(const double& percentile) {
@@ -165,47 +172,4 @@ void WhiteBalanceModule::balanceWhitePca(cv::cuda::GpuMat& image) {
 }
 #endif
 
-//-----------------------------------------------------------------------------
-// Apply method
-//-----------------------------------------------------------------------------
-template <typename T>
-bool WhiteBalanceModule::apply(T& image) {
-  if (!enabled_) {
-    return false;
-  }
-
-  if (image.channels() != 3) {
-    return false;
-  }
-
-  if (method_ == "simple") {
-    balanceWhiteSimple(image);
-    return true;
-
-  } else if (method_ == "gray_world" || method_ == "grey_world") {
-    balanceWhiteGreyWorld(image);
-    return true;
-
-  } else if (method_ == "learned") {
-    balanceWhiteLearned(image);
-    return true;
-
-  } else if (method_ == "ccc") {
-    // CCC white balancing - this works directly on GPU
-    cccWBPtr_->setSaturationThreshold(saturation_bright_thr_, saturation_dark_thr_);
-    cccWBPtr_->setTemporalConsistency(temporal_consistency_);
-    cccWBPtr_->setDebug(false);
-    cccWBPtr_->balanceWhite(image, image);
-    return true;
-
-  } else if (method_ == "pca") {
-    balanceWhitePca(image);
-    return true;
-
-  } else {
-    throw std::invalid_argument("White Balance method [" + method_ +
-                                "] not supported. "
-                                "Supported algorithms: 'simple', 'gray_world', 'learned', 'ccc', 'pca'");
-  }
-}
 }  // namespace image_proc_cuda

@@ -14,7 +14,9 @@ Author: Matias Mattamala
 
 namespace image_proc_white_balance {
 ConvolutionalColorConstancyWB::ConvolutionalColorConstancyWB()
-    : ConvolutionalColorConstancyWB::ConvolutionalColorConstancyWB(DEFAULT_MODEL_PATH) {}
+    : ConvolutionalColorConstancyWB::ConvolutionalColorConstancyWB(DEFAULT_MODEL_PATH) {
+  kf_ptr_ = std::make_shared<cv::KalmanFilter>(2, 2, 0, CV_32F);
+}
 
 ConvolutionalColorConstancyWB::ConvolutionalColorConstancyWB(const std::string& filename)
     : model_filename_(filename),
@@ -362,9 +364,9 @@ void ConvolutionalColorConstancyWB::computeGains() {
   gain_b_ /= factor;
 
   // float gain_sum = gain_r_ + gain_g_ + gain_b_;
-	// gain_r_ = gain_r_ / gain_sum * 3;
-	// gain_g_ = gain_g_ / gain_sum * 3;
-	// gain_b_ = gain_b_ / gain_sum * 3;
+  // gain_r_ = gain_r_ / gain_sum * 3;
+  // gain_g_ = gain_g_ / gain_sum * 3;
+  // gain_b_ = gain_b_ / gain_sum * 3;
 }
 
 void ConvolutionalColorConstancyWB::applyGains(cv::Mat& image) {

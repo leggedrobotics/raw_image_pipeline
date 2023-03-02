@@ -2,7 +2,7 @@
   <!-- General options-->
   <arg name="launch_prefix"                        default=""/>
   <arg name="dump_images"                          default="false"/> <!-- writes the output of each module to /tmp -->
-  <arg name="debayer_option"                       default="bayer_gbrg8"/>  <!-- auto, bayer_bggr8, bayer_gbrg8, bayer_grbg8, bayer_rggb8-->
+  <arg name="debayer_encoding"                     default="bayer_gbrg8"/>  <!-- auto, bayer_bggr8, bayer_gbrg8, bayer_grbg8, bayer_rggb8-->
   <arg name="output_encoding"                      default="BGR"/>   <!-- Format of the published image BGR and RGB supported-->
   <arg name="skip_number_of_images_for_slow_topic" default="5"/>     <!-- To publish images at a slower rate -->
 

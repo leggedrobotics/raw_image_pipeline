@@ -20,67 +20,69 @@ void DebayerModule::setEncoding(const std::string& encoding) {
 }
 
 //-----------------------------------------------------------------------------
+// Helper methods
+//-----------------------------------------------------------------------------
+bool DebayerModule::isBayerEncoding(const std::string& encoding) const {
+  // Find if encoding is in list of Bayer types
+  return std::find(BAYER_TYPES.begin(), BAYER_TYPES.end(), encoding) != BAYER_TYPES.end();
+}
+
+//-----------------------------------------------------------------------------
 // Wrapper methods (CPU)
 //-----------------------------------------------------------------------------
-void DebayerModule::debayer(cv::Mat& image) {
+void DebayerModule::debayer(cv::Mat& image, std::string& encoding) {
   cv::Mat out;
   // We only apply demosaicing (debayer) if the format is valid
-  if (encoding_ == "bayer_bggr8") {
-    cv::demosaicing(image, out, cv::COLOR_BayerBG2BGR_EA);
+  if (encoding == "bayer_bggr8") {
+    cv::demosaicing(image, out, cv::COLOR_BayerBG2BGR);
     image = out;
-  } else if (encoding_ == "bayer_gbrg8") {
-    cv::demosaicing(image, out, cv::COLOR_BayerGB2BGR_EA);
+  } else if (encoding == "bayer_gbrg8") {
+    cv::demosaicing(image, out, cv::COLOR_BayerGB2BGR);
     image = out;
-  } else if (encoding_ == "bayer_grbg8") {
-    cv::demosaicing(image, out, cv::COLOR_BayerGR2BGR_EA);
+  } else if (encoding == "bayer_grbg8") {
+    cv::demosaicing(image, out, cv::COLOR_BayerGR2BGR);
     image = out;
-  } else if (encoding_ == "bayer_rggb8") {
-    cv::demosaicing(image, out, cv::COLOR_BayerRG2BGR_EA);
+  } else if (encoding == "bayer_rggb8") {
+    cv::demosaicing(image, out, cv::COLOR_BayerRG2BGR);
     image = out;
   }
   // We ignore non-bayer encodings
-  else if (isBayerEncoding(encoding_)) {
-    throw std::invalid_argument("Encoding [" + encoding_ + "] is a valid pattern but is not supported!");
+  else if (isBayerEncoding(encoding)) {
+    throw std::invalid_argument("Encoding [" + encoding + "] is a valid pattern but is not supported!");
   }
+
+  // Update encoding
+  encoding = "bgr8";
+  cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
 }
 
 //-----------------------------------------------------------------------------
 // Wrapper methods (GPU)
 //-----------------------------------------------------------------------------
 #ifdef HAS_CUDA
-void DebayerModule::debayer(cv::cuda::GpuMat& image) {
+void DebayerModule::debayer(cv::cuda::GpuMat& image, std::string& encoding) {
   cv::cuda::GpuMat out;
   // We only apply demosaicing (debayer) if the format is valid
-  if (encoding_ == "bayer_bggr8") {
+  if (encoding == "bayer_bggr8") {
     cv::cuda::demosaicing(image, out, cv::cuda::COLOR_BayerBG2BGR_MHT);
     image = out;
-  } else if (encoding_ == "bayer_gbrg8") {
+  } else if (encoding == "bayer_gbrg8") {
     cv::cuda::demosaicing(image, out, cv::cuda::COLOR_BayerGB2BGR_MHT);
     image = out;
-  } else if (encoding_ == "bayer_grbg8") {
+  } else if (encoding == "bayer_grbg8") {
     cv::cuda::demosaicing(image, out, cv::cuda::COLOR_BayerGR2BGR_MHT);
     image = out;
-  } else if (encoding_ == "bayer_rggb8") {
+  } else if (encoding == "bayer_rggb8") {
     cv::cuda::demosaicing(image, out, cv::cuda::COLOR_BayerRG2BGR_MHT);
     image = out;
   }
   // We ignore non-bayer encodings
-  else if (isBayerEncoding(encoding_)) {
-    throw std::invalid_argument("Encoding [" + encoding_ + "] is a valid pattern but is not supported!");
+  else if (isBayerEncoding(encoding)) {
+    throw std::invalid_argument("Encoding [" + encoding + "] is a valid pattern but is not supported!");
   }
+
+  // Update encoding
+  encoding = "bgr8";
 }
 #endif
-
-//-----------------------------------------------------------------------------
-// Apply method
-//-----------------------------------------------------------------------------
-template <typename T>
-bool DebayerModule::apply(T& image) {
-  if (!enabled_) {
-    return false;
-  }
-
-  debayer(image);
-  return true;
-}
 }  // namespace image_proc_cuda

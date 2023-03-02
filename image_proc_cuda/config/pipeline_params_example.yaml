@@ -35,3 +35,5 @@ color_enhancer:
 
 undistortion:
   enabled: true
+  balance: 0.0
+  fov_scale: 0.8 #1.2

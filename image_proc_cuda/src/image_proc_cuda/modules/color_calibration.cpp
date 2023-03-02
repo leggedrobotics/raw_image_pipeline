@@ -2,7 +2,10 @@
 
 namespace image_proc_cuda {
 
-ColorCalibrationModule::ColorCalibrationModule() : enabled_(true) {}
+ColorCalibrationModule::ColorCalibrationModule() : enabled_(true) {
+  cv::Matx33d matrix = cv::Matx33d::eye();
+  initCalibrationMatrix(matrix);
+}
 
 void ColorCalibrationModule::enable(bool enabled) {
   enabled_ = enabled;
@@ -82,28 +85,5 @@ void ColorCalibrationModule::colorCorrection(cv::cuda::GpuMat& image) {
   nppiColorTwist32f_8u_C3IR(image.data, static_cast<int>(image.step), image_size, gpu_color_calibration_matrix_);
 }
 #endif
-
-//-----------------------------------------------------------------------------
-// Apply method
-//-----------------------------------------------------------------------------
-template <typename T>
-bool ColorCalibrationModule::apply(T& image) {
-  if (!enabled_) {
-    return false;
-  }
-
-  if (image.channels() != 3) {
-    return false;
-  }
-
-  if (!calibration_available_) {
-    std::cout << "No calibration available!" << std::endl;
-    return false;
-  }
-
-  colorCorrection(image);
-
-  return true;
-}
 
 }  // namespace image_proc_cuda

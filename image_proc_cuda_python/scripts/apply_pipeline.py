@@ -18,16 +18,28 @@ def main():
     param_file = rospack.get_path("image_proc_cuda") + "/config/pipeline_params_example.yaml"
 
     # Create image Proc
-    proc = ImageProcCuda(param_file, calib_file, color_calib_file)
+    proc = ImageProcCuda(param_file, calib_file, color_calib_file, False)
 
     # Uncomment below to show calibration data
-    # print("image_height:", proc.get_image_height())
-    # print("image_width:", proc.get_image_width())
-    # print("distortion_model:", proc.get_distortion_model())
-    # print("camera_matrix:", proc.get_camera_matrix())
-    # print("distortion_coefficients:", proc.get_distortion_coefficients())
-    # print("rectification_matrix:", proc.get_rectification_matrix())
-    # print("projection_matrix:", proc.get_projection_matrix())
+    print("Original parameters:")
+    print("  dist_image_height:", proc.get_dist_image_height())
+    print("  dist_image_width:", proc.get_dist_image_width())
+    print("  dist_distortion_model:", proc.get_dist_distortion_model())
+    print("  dist_camera_matrix:", proc.get_dist_camera_matrix())
+    print("  dist_distortion_coefficients:", proc.get_dist_distortion_coefficients())
+    print("  dist_rectification_matrix:", proc.get_dist_rectification_matrix())
+    print("  dist_projection_matrix:", proc.get_dist_projection_matrix())
+
+    print("\nNew parameters:")
+    print("  rect_image_height:", proc.get_rect_image_height())
+    print("  rect_image_width:", proc.get_rect_image_width())
+    print("  rect_distortion_model:", proc.get_rect_distortion_model())
+    print("  rect_camera_matrix:", proc.get_rect_camera_matrix())
+    print("  rect_distortion_coefficients:", proc.get_rect_distortion_coefficients())
+    print("  rect_rectification_matrix:", proc.get_rect_rectification_matrix())
+    print("  rect_projection_matrix:", proc.get_rect_projection_matrix())
+
+
 
     # Apply pipeline without modifying input
     img2 = proc.process(img, "bgr8")

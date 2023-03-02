@@ -117,16 +117,4 @@ void VignettingCorrectionModule::correct(cv::cuda::GpuMat& image) {
 }
 #endif
 
-//-----------------------------------------------------------------------------
-// Apply method
-//-----------------------------------------------------------------------------
-template <typename T>
-bool VignettingCorrectionModule::apply(T& image) {
-  if (!enabled_) {
-    return false;
-  }
-
-  correct(image);
-  return true;
-}
 }  // namespace image_proc_cuda

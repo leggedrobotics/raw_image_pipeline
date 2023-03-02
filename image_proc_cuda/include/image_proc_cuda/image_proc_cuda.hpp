@@ -15,7 +15,6 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
-#include <npp.h>
 #include <yaml-cpp/yaml.h>
 
 #include <image_proc_cuda/utils.hpp>
@@ -36,19 +35,30 @@ class ImageProcCuda {
  public:
   // Constructor & destructor
   ImageProcCuda(const std::string& params_path = "", const std::string& calibration_path = "",
-                const std::string& color_calibration_path = "");
+                const std::string& color_calibration_path = "", bool use_gpu = true);
   ~ImageProcCuda();
 
-  // Main interface to apply the pipeline
-  bool apply(cv::Mat& image, const std::string& encoding);
+  //-----------------------------------------------------------------------------
+  // Main interfaces
+  //-----------------------------------------------------------------------------
+  bool apply(cv::Mat& image, std::string& encoding);
 
   // Alternative pipeline that returns a copy
-  cv::Mat process(const cv::Mat& image, const std::string& encoding);
+  cv::Mat process(const cv::Mat& image, std::string& encoding);
 
   // Loaders
   void loadParams(const std::string& file_path);
+  void loadCameraCalibration(const std::string& file_path);
+  void loadColorCalibration(const std::string& file_path);
+  void initUndistortion();
 
+  // Other interfaces
+  void resetWhiteBalanceTemporalConsistency();
+  void setGpu(bool use_gpu);
+
+  //-----------------------------------------------------------------------------
   // Setters
+  //-----------------------------------------------------------------------------
   void setDebayer(bool enabled);
   void setDebayerEncoding(const std::string& encoding);
 
@@ -77,34 +87,66 @@ class ImageProcCuda {
 
   void setUndistortion(bool enabled);
   void setUndistortionImageSize(int width, int height);
+  void setUndistortionNewImageSize(int width, int height);
+  void setUndistortionBalance(double balance);
+  void setUndistortionFovScale(double fov_scale);
   void setUndistortionCameraMatrix(const std::vector<double>& camera_matrix);
   void setUndistortionDistortionCoefficients(const std::vector<double>& coefficients);
   void setUndistortionDistortionModel(const std::string& model);
   void setUndistortionRectificationMatrix(const std::vector<double>& rectification_matrix);
   void setUndistortionProjectionMatrix(const std::vector<double>& projection_matrix);
-  int getImageHeight() const;
-  int getImageWidth() const;
-  std::string getDistortionModel() const;
-  std::string getOriginalDistortionModel() const;
-  cv::Mat getCameraMatrix() const;
-  cv::Mat getOriginalCameraMatrix() const;
-  cv::Mat getDistortionCoefficients() const;
-  cv::Mat getOriginalDistortionCoefficients() const;
-  cv::Mat getRectificationMatrix() const;
-  cv::Mat getOriginalRectificationMatrix() const;
-  cv::Mat getProjectionMatrix() const;
-  cv::Mat getOriginalProjectionMatrix() const;
-  cv::Mat getDistortedImage() const;
 
-  // Other interfaces
-  void resetWhiteBalanceTemporalConsistency();
+  //-----------------------------------------------------------------------------
+  // Getters
+  //-----------------------------------------------------------------------------
+  bool isDebayerEnabled() const;
+  bool isFlipEnabled() const;
+  bool isWhiteBalanceEnabled() const;
+  bool isColorCalibrationEnabled() const;
+  bool isGammaCorrectionEnabled() const;
+  bool isVignettingCorrectionEnabled() const;
+  bool isColorEnhancerEnabled() const;
+  bool isUndistortionEnabled() const;
+
+  int getDistImageHeight() const;
+  int getDistImageWidth() const;
+  std::string getDistDistortionModel() const;
+  cv::Mat getDistCameraMatrix() const;
+  cv::Mat getDistDistortionCoefficients() const;
+  cv::Mat getDistRectificationMatrix() const;
+  cv::Mat getDistProjectionMatrix() const;
+
+  int getRectImageHeight() const;
+  int getRectImageWidth() const;
+  std::string getRectDistortionModel() const;
+  cv::Mat getRectCameraMatrix() const;
+  cv::Mat getRectDistortionCoefficients() const;
+  cv::Mat getRectRectificationMatrix() const;
+  cv::Mat getRectProjectionMatrix() const;
+
+  cv::Mat getDistImage() const;
+  cv::Mat getRectMask() const;
 
  private:
+  //-----------------------------------------------------------------------------
   // Pipeline
+  //-----------------------------------------------------------------------------
   template <typename T>
-  void pipeline(T& image);
-
+  void pipeline(T& image, std::string& encoding) {
+    // Run pipeline
+    debayer_.apply(image, encoding);
+    flipper_.apply(image, encoding);
+    white_balancer_.apply(image, encoding);
+    color_calibrator_.apply(image, encoding);
+    gamma_corrector_.apply(image, encoding);
+    vignetting_corrector_.apply(image, encoding);
+    color_enhancer_.apply(image, encoding);
+    undistorter_.apply(image, encoding);
+  }
+  
+  //-----------------------------------------------------------------------------
   // Modules
+  //-----------------------------------------------------------------------------
   ColorCalibrationModule color_calibrator_;
   ColorEnhancerModule color_enhancer_;
   DebayerModule debayer_;
@@ -114,6 +156,9 @@ class ImageProcCuda {
   VignettingCorrectionModule vignetting_corrector_;
   WhiteBalanceModule white_balancer_;
 
+  //-----------------------------------------------------------------------------
+  // Other variables
+  //-----------------------------------------------------------------------------
   // Pipeline options
   bool use_gpu_;
 

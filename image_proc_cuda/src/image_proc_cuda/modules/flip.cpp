@@ -32,16 +32,4 @@ void FlipModule::flip(cv::cuda::GpuMat& image) {
 }
 #endif
 
-//-----------------------------------------------------------------------------
-// Apply method
-//-----------------------------------------------------------------------------
-template <typename T>
-bool FlipModule::apply(T& image) {
-  if (!enabled_) {
-    return false;
-  }
-
-  flip(image);
-  return true;
-}
 }  // namespace image_proc_cuda

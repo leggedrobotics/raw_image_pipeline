@@ -28,7 +28,16 @@ class ColorEnhancerModule {
   // Main interface
   //-----------------------------------------------------------------------------
   template <typename T>
-  bool apply(T& image);
+  bool apply(T& image, std::string& encoding) {
+    if (!enabled_) {
+      return false;
+    }
+    if (image.channels() != 3) {
+      return false;
+    }
+    enhance(image);
+    return true;
+  }
 
   //-----------------------------------------------------------------------------
   // Helper methods (CPU)
@@ -46,7 +55,6 @@ class ColorEnhancerModule {
   double value_gain_;
   double saturation_gain_;
   double hue_gain_;
-
 };
 
 }  // namespace image_proc_cuda

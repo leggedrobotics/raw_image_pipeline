@@ -53,23 +53,4 @@ void ColorEnhancerModule::enhance(cv::cuda::GpuMat& image) {
   cv::cuda::cvtColor(color_enhanced_image, image, cv::COLOR_HSV2BGR);
 }
 #endif
-
-//-----------------------------------------------------------------------------
-// Apply method
-//-----------------------------------------------------------------------------
-template <typename T>
-bool ColorEnhancerModule::apply(T& image) {
-  if (!enabled_) {
-    return false;
-  }
-
-  if (image.channels() != 3) {
-    return false;
-  }
-
-  enhance(image);
-
-  return true;
-}
-
 }  // namespace image_proc_cuda

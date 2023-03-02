@@ -77,23 +77,4 @@ void GammaCorrectionModule::gammaCorrectDefault(cv::cuda::GpuMat& image) {
   image = out;
 }
 #endif
-
-//-----------------------------------------------------------------------------
-// Apply method
-//-----------------------------------------------------------------------------
-template <typename T>
-bool GammaCorrectionModule::apply(T& image) {
-  if (!enabled_) {
-    return false;
-  }
-
-  if (method_ == "custom") {
-    gammaCorrectCustom(image);
-
-  } else {
-    gammaCorrectDefault(image);
-  }
-
-  return true;
-}
 }  // namespace image_proc_cuda

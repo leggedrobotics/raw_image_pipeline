@@ -10,6 +10,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
+#include <memory>
 
 #ifdef HAS_CUDA
 #include <opencv2/core/cuda.hpp>
@@ -24,6 +25,7 @@ class WhiteBalanceModule {
   WhiteBalanceModule();
   WhiteBalanceModule(const std::string& method);
   void enable(bool enabled);
+  bool enabled() const;
 
   //-----------------------------------------------------------------------------
   // Setters
@@ -39,7 +41,43 @@ class WhiteBalanceModule {
   // Main interface
   //-----------------------------------------------------------------------------
   template <typename T>
-  bool apply(T& image);
+  bool apply(T& image, std::string& encoding) {
+    if (!enabled_) {
+      return false;
+    }
+    if (image.channels() != 3) {
+      return false;
+    }
+    if (method_ == "simple") {
+      balanceWhiteSimple(image);
+      return true;
+
+    } else if (method_ == "gray_world" || method_ == "grey_world") {
+      balanceWhiteGreyWorld(image);
+      return true;
+
+    } else if (method_ == "learned") {
+      balanceWhiteLearned(image);
+      return true;
+
+    } else if (method_ == "ccc") {
+      // CCC white balancing - this works directly on GPU
+      cccWBPtr_->setSaturationThreshold(saturation_bright_thr_, saturation_dark_thr_);
+      cccWBPtr_->setTemporalConsistency(temporal_consistency_);
+      cccWBPtr_->setDebug(false);
+      cccWBPtr_->balanceWhite(image, image);
+      return true;
+
+    } else if (method_ == "pca") {
+      balanceWhitePca(image);
+      return true;
+
+    } else {
+      throw std::invalid_argument("White Balance method [" + method_ +
+                                  "] not supported. "
+                                  "Supported algorithms: 'simple', 'gray_world', 'learned', 'ccc', 'pca'");
+    }
+  }
 
   //-----------------------------------------------------------------------------
   // White balance wrapper methods (CPU)
@@ -71,7 +109,7 @@ class WhiteBalanceModule {
   bool temporal_consistency_;
 
   // Pointers
-  std::unique_ptr<image_proc_white_balance::ConvolutionalColorConstancyWB> cccWBPtr_;
+  std::shared_ptr<image_proc_white_balance::ConvolutionalColorConstancyWB> cccWBPtr_;
 };
 
 }  // namespace image_proc_cuda
