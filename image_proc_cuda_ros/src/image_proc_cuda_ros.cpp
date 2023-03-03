@@ -155,7 +155,7 @@ void ImageProcCudaRos::setupRosParams() {
 }
 
 void ImageProcCudaRos::setupSubAndPub() {
-  constexpr size_t ros_queue_size = 5u;  // We always process the most updated frame
+  constexpr size_t ros_queue_size = 1u;  // We always process the most updated frame
 
   // Set up the raw image subscriber.
   boost::function<void(const sensor_msgs::ImageConstPtr&)> image_callback = boost::bind(&ImageProcCudaRos::imageCallback, this, _1);

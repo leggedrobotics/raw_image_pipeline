@@ -28,23 +28,23 @@ namespace image_proc_white_balance {
 class ConvolutionalColorConstancyWB {
  private:
   // Model
-  template<typename T>
-  struct Model {
-    int width_;
-    int height_;
-    T hist_;
-    T filter_;
-    T bias_;
-    T response_;
-    T hist_fft_;
-    T filter_fft_;
-    T bias_fft_;
-    T response_fft_;
-  };
+    template <typename T>
+    struct Model {
+      int width_;
+      int height_;
+      T hist_;
+      T filter_;
+      T bias_;
+      T response_;
+      T hist_fft_;
+      T filter_fft_;
+      T bias_fft_;
+      T response_fft_;
+    };
 
-  Model<cv::Mat> model_;
+    Model<cv::Mat> model_;
   #ifdef HAS_CUDA
-  Model<cv::cuda::GpuMat> gpu_model_;
+    Model<cv::cuda::GpuMat> gpu_model_;
   #endif
 
   // Model filename
@@ -88,7 +88,7 @@ class ConvolutionalColorConstancyWB {
 
   // Calculate histogram of input image
   void calculateHistogramFeature(const cv::Mat& src, std::string out_name = "input");
-  
+
   // Enforces temporal consistency with a Kalman filter
   int kalmanFiltering();
 
@@ -100,22 +100,21 @@ class ConvolutionalColorConstancyWB {
   // Apply gains
   void applyGains(cv::Mat& image);
 
-  // Compute and apply RGB gains
-  #ifdef HAS_CUDA
+// Compute and apply RGB gains
+#ifdef HAS_CUDA
   int computeResponseCuda();
   void applyGainsCuda(cv::cuda::GpuMat& image);
-  #endif
-  
+#endif
 
  public:
   ConvolutionalColorConstancyWB(const std::string& filename);
   ConvolutionalColorConstancyWB();
   ~ConvolutionalColorConstancyWB();
 
-  // Applies white balance
-  #ifdef HAS_CUDA
+// Applies white balance
+#ifdef HAS_CUDA
   void balanceWhite(const cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst);
-  #endif
+#endif
   void balanceWhite(const cv::Mat& src, cv::Mat& dst);
 
   // Set threshold

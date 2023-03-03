@@ -19,10 +19,6 @@ find_package(catkin REQUIRED
     ${PACKAGE_DEPENDENCIES}
 )
 
-find_package(CUDA REQUIRED)
-message("CUDA Version:" ${CUDA_VERSION_STRING})
-message("CUDA Path:" ${CUDA_DIR})
-
 find_package(Eigen3 REQUIRED)
 message("Eigen Version:" ${EIGEN3_VERSION_STRING})
 message("Eigen Path:" ${Eigen3_DIR})
@@ -44,7 +40,6 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  ${CUDA_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
 )
 
@@ -53,8 +48,6 @@ add_library(${PROJECT_NAME} SHARED
 )
 target_link_libraries(${PROJECT_NAME}
     ${catkin_LIBRARIES}
-    ${STATIC_NVENC}
-    ${SYSTEM_LIBS}
     ${OpenCV_LIBS}
 )
 

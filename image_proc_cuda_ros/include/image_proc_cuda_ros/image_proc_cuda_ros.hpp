@@ -62,7 +62,6 @@ class ImageProcCudaRos {
 
   template <typename T>
   T readParameter(const std::string& param, T default_value) {
-    std::cout << param << ": " << default_value << std::endl;
     T value;
     if (!nh_private_.param<T>(param, value, default_value)) {
       ROS_WARN_STREAM("could not get [" << param << "], defaulting to: " << value);
@@ -73,9 +72,6 @@ class ImageProcCudaRos {
   }
 
   std::vector<double> readParameter(const std::string& param, std::vector<double> default_value);
-
-  // Postprocessing pipeline
-  ImageProcCuda image_proc_;
 
   // ROS
   ros::NodeHandle nh_;
@@ -110,6 +106,9 @@ class ImageProcCudaRos {
   int skip_number_of_images_for_slow_topic_;
   int skipped_images_for_slow_topic_;
   int skipped_images_for_slow_topic_rect_;
+
+  // Postprocessing pipeline
+  ImageProcCuda image_proc_;
 };
 
 }  // namespace image_proc_cuda

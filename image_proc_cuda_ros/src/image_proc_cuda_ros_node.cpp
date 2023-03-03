@@ -4,9 +4,7 @@
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "image_proc_cuda_ros");
-
-  // std::string node_name = ros::this_node::getName()
-
+  
   ros::NodeHandle nh;
   ros::NodeHandle nh_priv("~");
 
@@ -14,10 +12,8 @@ int main(int argc, char** argv)
 
   image_proc.setupRosParams();
   image_proc.setupSubAndPub();
-
-  // Spin
-  ros::AsyncSpinner spinner(1); // Use n threads
-  spinner.start();
+  image_proc.run();
+  
   ros::waitForShutdown();
   return 0;
 }

@@ -14,12 +14,7 @@ Author: Matias Mattamala
 
 namespace image_proc_white_balance {
 ConvolutionalColorConstancyWB::ConvolutionalColorConstancyWB()
-    : ConvolutionalColorConstancyWB::ConvolutionalColorConstancyWB(DEFAULT_MODEL_PATH) {
-  kf_ptr_ = std::make_shared<cv::KalmanFilter>(2, 2, 0, CV_32F);
-}
-
-ConvolutionalColorConstancyWB::ConvolutionalColorConstancyWB(const std::string& filename)
-    : model_filename_(filename),
+    : model_filename_(DEFAULT_MODEL_PATH),
       small_size_(360, 270),
       bin_size_(1.0f / 64.0f),
       uv0_(-1.421875),
@@ -33,9 +28,16 @@ ConvolutionalColorConstancyWB::ConvolutionalColorConstancyWB(const std::string& 
       first_frame_(true),
       idx_(0) {
   loadModel(model_filename_);
+  kf_ptr_ = std::make_shared<cv::KalmanFilter>(2, 2, 0, CV_32F);
 }
 
-ConvolutionalColorConstancyWB::~ConvolutionalColorConstancyWB() {}
+ConvolutionalColorConstancyWB::ConvolutionalColorConstancyWB(const std::string& filename)
+    : ConvolutionalColorConstancyWB::ConvolutionalColorConstancyWB() {
+  loadModel(model_filename_);
+}
+
+ConvolutionalColorConstancyWB::~ConvolutionalColorConstancyWB() {
+}
 
 #ifdef HAS_CUDA
 void ConvolutionalColorConstancyWB::balanceWhite(const cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst) {
@@ -43,9 +45,14 @@ void ConvolutionalColorConstancyWB::balanceWhite(const cv::cuda::GpuMat& src, cv
   src.copyTo(dst);
   cv::Mat src_cpu;
   src.download(src_cpu);
+  std::cout << "src size: " << src.size() << std::endl;
+  std::cout << "src_cpu_size: " << src_cpu.size() << std::endl;
+  std::cout << "small_size: " << small_size_ << std::endl;
   // Resize image
   cv::Mat small_image;
   cv::resize(src_cpu, small_image, small_size_);
+  // cv::resize(src_cpu, small_image, src_cpu.size() / 2);
+  
   // Convert to floating point
   cv::Mat small_image_f;
   small_image.convertTo(small_image_f, CV_32F);
@@ -83,6 +90,8 @@ void ConvolutionalColorConstancyWB::balanceWhite(const cv::cuda::GpuMat& src, cv
 void ConvolutionalColorConstancyWB::balanceWhite(const cv::Mat& src, cv::Mat& dst) {
   // Copy input to output
   src.copyTo(dst);
+  std::cout << src.size() << std::endl;
+  std::cout << small_size_ << std::endl;
   // Resize image
   cv::Mat small_image;
   cv::resize(src, small_image, small_size_);
@@ -108,6 +117,7 @@ int ConvolutionalColorConstancyWB::loadModel(const std::string& model_file) {
   std::cout << "Loading model file " << model_file << std::endl;
 
   std::fstream fs(model_file, std::ios::in | std::ios::binary);
+
   // read size
   fs.read(reinterpret_cast<char*>(&model_.width_), sizeof(int));
   fs.read(reinterpret_cast<char*>(&model_.height_), sizeof(int));
@@ -162,6 +172,7 @@ int ConvolutionalColorConstancyWB::loadModel(const std::string& model_file) {
   gpu_model_.hist_.create(model_.width_, model_.height_, CV_32F);
   gpu_model_.hist_.setTo(cv::Scalar(0.f));
 #endif
+  std::cout << "END CUDA INIT" << std::endl;
 
   // Compute uv coordinates
   uv_pos_ = cv::Point(model_.height_ / 2, model_.width_ / 2);

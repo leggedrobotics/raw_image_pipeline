@@ -23,7 +23,6 @@ namespace image_proc_cuda {
 class WhiteBalanceModule {
  public:
   WhiteBalanceModule();
-  WhiteBalanceModule(const std::string& method);
   void enable(bool enabled);
   bool enabled() const;
 
@@ -62,10 +61,14 @@ class WhiteBalanceModule {
 
     } else if (method_ == "ccc") {
       // CCC white balancing - this works directly on GPU
-      cccWBPtr_->setSaturationThreshold(saturation_bright_thr_, saturation_dark_thr_);
-      cccWBPtr_->setTemporalConsistency(temporal_consistency_);
-      cccWBPtr_->setDebug(false);
-      cccWBPtr_->balanceWhite(image, image);
+      // cccWBPtr_->setSaturationThreshold(saturation_bright_thr_, saturation_dark_thr_);
+      // cccWBPtr_->setTemporalConsistency(temporal_consistency_);
+      // cccWBPtr_->setDebug(false);
+      // cccWBPtr_->balanceWhite(image, image);
+      ccc_.setSaturationThreshold(saturation_bright_thr_, saturation_dark_thr_);
+      ccc_.setTemporalConsistency(temporal_consistency_);
+      ccc_.setDebug(false);
+      ccc_.balanceWhite(image, image);
       return true;
 
     } else if (method_ == "pca") {
@@ -109,7 +112,9 @@ class WhiteBalanceModule {
   bool temporal_consistency_;
 
   // Pointers
-  std::shared_ptr<image_proc_white_balance::ConvolutionalColorConstancyWB> cccWBPtr_;
+  // std::shared_ptr<image_proc_white_balance::ConvolutionalColorConstancyWB> cccWBPtr_;
+ public:
+  image_proc_white_balance::ConvolutionalColorConstancyWB ccc_;
 };
 
 }  // namespace image_proc_cuda

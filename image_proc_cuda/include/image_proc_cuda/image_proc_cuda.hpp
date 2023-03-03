@@ -34,8 +34,9 @@ namespace image_proc_cuda {
 class ImageProcCuda {
  public:
   // Constructor & destructor
-  ImageProcCuda(const std::string& params_path = "", const std::string& calibration_path = "",
-                const std::string& color_calibration_path = "", bool use_gpu = true);
+  ImageProcCuda();
+  ImageProcCuda(const std::string& params_path, const std::string& calibration_path,
+                const std::string& color_calibration_path, bool use_gpu);
   ~ImageProcCuda();
 
   //-----------------------------------------------------------------------------

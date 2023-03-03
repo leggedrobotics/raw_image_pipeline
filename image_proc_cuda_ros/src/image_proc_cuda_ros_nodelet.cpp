@@ -19,6 +19,7 @@ class ImageProcCudaNodelet : public nodelet::Nodelet {
 
       image_proc_->setupRosParams();
       image_proc_->setupSubAndPub();
+      image_proc_->run();
     }
 
     ros::NodeHandle nh_, nh_private_;

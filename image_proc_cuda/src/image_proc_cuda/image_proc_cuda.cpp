@@ -2,20 +2,26 @@
 
 #include <boost/filesystem.hpp>
 #define FILE_FOLDER (boost::filesystem::path(__FILE__).parent_path().string())
-#define DEFAULT_CALIBRATION_PATH (FILE_FOLDER + "/../../config/pipeline_params_example.yaml")
+#define DEFAULT_PARAMS_PATH (FILE_FOLDER + "/../../config/pipeline_params_example.yaml")
+#define DEFAULT_CALIBRATION_PATH (FILE_FOLDER + "/../../config/alphasense_calib_example.yaml")
 #define DEFAULT_COLOR_CALIBRATION_PATH (FILE_FOLDER + "/../../config/alphasense_color_calib_example.yaml")
 
 namespace image_proc_cuda {
 
+ImageProcCuda::ImageProcCuda() : use_gpu_(true), dump_images_(false), idx_(0), white_balancer_() {
+  // Load parameters
+  loadParams(DEFAULT_PARAMS_PATH);
+  undistorter_.loadCalibration(DEFAULT_CALIBRATION_PATH);
+  color_calibrator_.loadCalibration(DEFAULT_COLOR_CALIBRATION_PATH);
+}
+
 ImageProcCuda::ImageProcCuda(const std::string& params_path, const std::string& calibration_path, const std::string& color_calibration_path,
                              bool use_gpu)
-    :  // Debug
-      use_gpu_(use_gpu),
-      dump_images_(false),
-      idx_(0) {
+    : use_gpu_(use_gpu), dump_images_(false), idx_(0), white_balancer_() {
+
   // Load parameters
   if (params_path.empty())
-    loadParams(DEFAULT_CALIBRATION_PATH);
+    loadParams(DEFAULT_PARAMS_PATH);
   else
     loadParams(params_path);
 

@@ -184,23 +184,6 @@ void UndistortionModule::loadCalibration(const std::string& file_path) {
 }
 
 void UndistortionModule::init() {
-  // std::cout << "dist_camera_matrix_"
-  //           << ": " << dist_camera_matrix_ << std::endl;
-  // std::cout << "dist_distortion_coeff_"
-  //           << ": " << dist_distortion_coeff_ << std::endl;
-  // std::cout << "dist_image_size_"
-  //           << ": " << dist_image_size_ << std::endl;
-  // std::cout << "dist_rectification_matrix_"
-  //           << ": " << dist_rectification_matrix_ << std::endl;
-  // std::cout << "rect_projection_matrix_"
-  //           << ": " << rect_projection_matrix_ << std::endl;
-  // std::cout << "rect_balance_"
-  //           << ": " << rect_balance_ << std::endl;
-  // std::cout << "rect_image_size_"
-  //           << ": " << rect_image_size_ << std::endl;
-  // std::cout << "rect_fov_scale_"
-  //           << ": " << rect_fov_scale_ << std::endl;
-
   cv::Mat new_camera_matrix;
   cv::fisheye::estimateNewCameraMatrixForUndistortRectify(dist_camera_matrix_,         // Intrinsics (distorted image)
                                                           dist_distortion_coeff_,      // Distortion (distorted image)
@@ -212,8 +195,6 @@ void UndistortionModule::init() {
                                                           rect_image_size_,  // Image size (new, undistorted image)
                                                           rect_fov_scale_    // Divisor for new focal length
   );
-  // std::cout << "new_projection_matrix"
-  //           << ":" << new_camera_matrix << std::endl;
   rect_camera_matrix_ = cv::Matx33d((double*)new_camera_matrix.ptr());
 
   // Initialize undistortion maps
