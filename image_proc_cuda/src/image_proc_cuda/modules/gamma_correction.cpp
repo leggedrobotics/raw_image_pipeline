@@ -2,7 +2,9 @@
 
 namespace image_proc_cuda {
 
-GammaCorrectionModule::GammaCorrectionModule() : enabled_(true) {}
+GammaCorrectionModule::GammaCorrectionModule(bool use_gpu) : enabled_(true), use_gpu_(use_gpu) {
+  init();
+}
 
 void GammaCorrectionModule::enable(bool enabled) {
   enabled_ = enabled;
@@ -22,38 +24,30 @@ void GammaCorrectionModule::setMethod(const std::string& method) {
 void GammaCorrectionModule::setK(const double& k) {
   k_ = k;
   is_forward_ = (k_ <= 1.0 ? true : false);
+  init();
+}
+
+void GammaCorrectionModule::init() {
+  cpu_lut_ = cv::Mat(1, 256, CV_8U);
+
+  for (int i = 0; i < 256; i++) {
+    float f = i / 255.0;
+    f = pow(f, k_);
+    cpu_lut_.at<uchar>(i) = cv::saturate_cast<uchar>(f * 255.0);
+  }
+
+#ifdef HAS_CUDA
+  if (use_gpu_) {
+    gpu_lut_ = cv::cuda::createLookUpTable(cpu_lut_);
+  }
+#endif
 }
 
 //-----------------------------------------------------------------------------
 // White balance wrapper methods (CPU)
 //-----------------------------------------------------------------------------
 void GammaCorrectionModule::gammaCorrectCustom(cv::Mat& image) {
-  cv::Mat dst;
-
-  uchar LUT[256];
-  image.copyTo(dst);
-  for (int i = 0; i < 256; i++) {
-    float f = i / 255.0;
-    f = pow(f, k_);
-    LUT[i] = cv::saturate_cast<uchar>(f * 255.0);
-  }
-
-  if (dst.channels() == 1) {
-    cv::MatIterator_<uchar> it = dst.begin<uchar>();
-    cv::MatIterator_<uchar> it_end = dst.end<uchar>();
-    for (; it != it_end; ++it) {
-      *it = LUT[(*it)];
-    }
-  } else {
-    cv::MatIterator_<cv::Vec3b> it = dst.begin<cv::Vec3b>();
-    cv::MatIterator_<cv::Vec3b> it_end = dst.end<cv::Vec3b>();
-    for (; it != it_end; ++it) {
-      (*it)[0] = LUT[(*it)[0]];
-      (*it)[1] = LUT[(*it)[1]];
-      (*it)[2] = LUT[(*it)[2]];
-    }
-  }
-  image = dst;
+  cv::LUT(image, cpu_lut_, image);
 }
 
 void GammaCorrectionModule::gammaCorrectDefault(cv::Mat& image) {
@@ -65,10 +59,7 @@ void GammaCorrectionModule::gammaCorrectDefault(cv::Mat& image) {
 //-----------------------------------------------------------------------------
 #ifdef HAS_CUDA
 void GammaCorrectionModule::gammaCorrectCustom(cv::cuda::GpuMat& image) {
-  cv::Mat cpu_image;
-  image.download(cpu_image);
-  gammaCorrectCustom(cpu_image);
-  image.upload(cpu_image);
+  gpu_lut_->transform(image, image);
 }
 
 void GammaCorrectionModule::gammaCorrectDefault(cv::cuda::GpuMat& image) {

@@ -8,10 +8,12 @@ using namespace image_proc_cuda;
 PYBIND11_MODULE(_py_image_proc_cuda, m) {
   m.doc() = "Image Proc Cuda bindings";  // module docstring
   py::class_<ImageProcCuda>(m, "ImageProcCuda")
-      .def(py::init<const std::string&, const std::string&, const std::string&, bool>(), py::arg("params_path") = "",
+      .def(py::init<bool>(),  //
+           py::arg("use_gpu"))
+      .def(py::init<bool, const std::string&, const std::string&, const std::string&>(),  //
+           py::arg("use_gpu") = true, py::arg("params_path") = "",
            py::arg("calibration_path") = "",        //
-           py::arg("color_calibration_path") = "",  //
-           py::arg("use_gpu") = true)
+           py::arg("color_calibration_path") = "")
       .def("apply", &ImageProcCuda::apply)
       .def("process", &ImageProcCuda::process)
       .def("load_params", &ImageProcCuda::loadParams)

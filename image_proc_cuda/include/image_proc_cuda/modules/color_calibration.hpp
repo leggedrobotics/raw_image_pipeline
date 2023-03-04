@@ -17,7 +17,7 @@ namespace image_proc_cuda {
 
 class ColorCalibrationModule {
  public:
-  ColorCalibrationModule();
+  ColorCalibrationModule(bool use_gpu);
   void enable(bool enabled);
   bool enabled() const;
 
@@ -35,7 +35,7 @@ class ColorCalibrationModule {
   // Main interface
   //-----------------------------------------------------------------------------
   template <typename T>
-  bool apply(T& image, std::string& encoding) {
+  bool apply(T& image) {
     if (!enabled_) {
       return false;
     }
@@ -68,6 +68,7 @@ class ColorCalibrationModule {
   // Variables
   //-----------------------------------------------------------------------------
   bool enabled_;
+  bool use_gpu_;
 
   // Calibration & undistortion
   bool calibration_available_;

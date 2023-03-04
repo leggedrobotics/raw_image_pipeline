@@ -41,7 +41,8 @@ public:
 				image_ = cv::imread(image_file_, cv::IMREAD_COLOR);
         cv::imshow("original", image_);
 
-				wb_ = std::make_shared<image_proc_white_balance::ConvolutionalColorConstancyWB>(model_file_);
+        bool use_gpu = true;
+				wb_ = std::make_shared<image_proc_white_balance::ConvolutionalColorConstancyWB>(use_gpu, model_file_);
 				wb_->setUV0(-1.421875);
         wb_->setDebug(false);
         

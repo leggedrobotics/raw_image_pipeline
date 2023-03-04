@@ -13,7 +13,7 @@
   <arg name="debayer/enabled"                      default="true"/>
   <arg name="flip/enabled"                         default="true"/>
   <arg name="white_balance/enabled"                default="true"/>
-  <arg name="color_calibration/enabled"            default="false"/>
+  <arg name="color_calibration/enabled"            default="true"/>
   <arg name="gamma_correction/enabled"             default="false"/>
   <arg name="vignetting_correction/enabled"        default="false"/>
   <arg name="color_enhancer/enabled"               default="false"/>
@@ -23,33 +23,31 @@
   <!-- Debayer  -->
   <arg name="debayer_encoding"                     default="auto"/>  <!-- auto, bayer_bggr8, bayer_gbrg8, bayer_grbg8, bayer_rggb8-->
   <!-- White balance options -->
-  <arg name="white_balance_method"                 default="ccc"/> <!-- simple, grey_world, learned, ccc, pca -->
-  <arg name="white_balance_clipping_percentile"    default="20"/>   <!-- simple WB, values [0-100]-->
-  <arg name="white_balance_saturation_bright_thr"  default="0.8"/> <!-- grey_world, learned, ccc, values [0.0, 1.0] -->
-  <arg name="white_balance_saturation_dark_thr"    default="0.2"/> <!-- grey_world, learned, ccc, values [0.0, 1.0] -->
-  <arg name="white_balance_temporal_consistency"   default="false"/>  <!-- ccc-only: uses a Kalman filter to track the illuminant estimate -->
+  <arg name="white_balance/method"                 default="ccc"/> <!-- simple, grey_world, learned, ccc, pca -->
+  <arg name="white_balance/clipping_percentile"    default="10"/>   <!-- simple WB, values [0-100]-->
+  <arg name="white_balance/saturation_bright_thr"  default="0.8"/> <!-- grey_world, learned, ccc, values [0.0, 1.0] -->
+  <arg name="white_balance/saturation_dark_thr"    default="0.2"/> <!-- grey_world, learned, ccc, values [0.0, 1.0] -->
+  <arg name="white_balance/temporal_consistency"   default="false"/>  <!-- ccc-only: uses a Kalman filter to track the illuminant estimate -->
   <!-- Gamma correction options -->
-  <arg name="gamma_correction_method"              default="custom"/> <!-- default, custom-->
-  <arg name="gamma_correction_k"                   default="1.2"/> <!-- k >= 1 -> forward gamma correction; k < 1 -> inverse gamma-->
+  <arg name="gamma_correction/method"              default="custom"/> <!-- default, custom-->
+  <arg name="gamma_correction/k"                   default="0.9"/> <!-- k >= 1 -> forward gamma (darker); k < 1 -> inverse gamma (brighter)-->
   <!-- Vignetting correction -->
-  <arg name="vignetting_correction_scale"          default="1.5"/> <!-- Linear term -->
-  <arg name="vignetting_correction_a2"             default="0.001"/> <!-- Quadratic term -->
-  <arg name="vignetting_correction_a4"             default="0.000001"/> <!-- Cubic term -->
-  <!-- Histogram equalization options -->
-  <arg name="clahe_clip_limit"                     default="1.5"/>
-  <arg name="clahe_tiles_grid_size"                default="8"/>
+  <arg name="vignetting_correction/scale"          default="1.5"/> <!-- Linear term -->
+  <arg name="vignetting_correction/a2"             default="0.001"/> <!-- Quadratic term -->
+  <arg name="vignetting_correction/a4"             default="0.000001"/> <!-- Cubic term -->
   <!-- HSV color enhancement -->
-  <arg name="color_enhancer_saturation_gain"       default="1.2"/> <!-- gain > 1.0 makes color more vibrant-->
+  <arg name="color_enhancer/saturation_gain"       default="1.2"/> <!-- gain > 1.0 makes color more vibrant-->
   <!-- Undistortion -->
-  <arg name="undistortion_fov_scale"               default="1.3"/> <!-- scale > 1.0 increases the FoV -->
+  <arg name="undistortion/balance"                 default="0.5"/> <!-- Balance [0,1] -->
+  <arg name="undistortion/fov_scale"               default="1.2"/> <!-- scale > 1.0 increases the FoV -->
 
   <!-- Per camera options -->
   <arg name="input_topic"                         default="alphasense_driver_ros/cam4"/>
   <arg name="output_topic"                        default="alphasense_driver_ros/cam4/debayered"/>
   <arg name="output_frame"                        default="cam0_sensor_frame_helper"/>
   
-  <arg name="calibration_file"                     default="$(find image_proc_cuda)/config/alphasense_calib_example.yaml"/>
-  <arg name="color_calibration_file"               default="$(find image_proc_cuda)/config/alphasense_color_calib_example.yaml"/>
+  <arg name="undistortion/calibration_file"       default="$(find image_proc_cuda)/config/alphasense_calib_example.yaml"/>
+  <arg name="color_calibration/calibration_file"  default="$(find image_proc_cuda)/config/alphasense_color_calib_example.yaml"/>
   
   <!-- Nodes -->
   <!-- <rosparam command="load" file="$(arg calibration_cam0)" ns="image_proc_cuda_ros_node_cam0"/> -->
@@ -67,30 +65,31 @@
     <param name="flip/enabled"                         value="$(arg flip/enabled)"/>
     
     <param name="white_balance/enabled"                value="$(arg white_balance/enabled)"/>
-    <param name="white_balance/method"                 value="$(arg white_balance_method)"/>
-    <param name="white_balance/clipping_percentile"    value="$(arg white_balance_clipping_percentile)"/>
-    <param name="white_balance/saturation_bright_thr"  value="$(arg white_balance_saturation_bright_thr)"/>
-    <param name="white_balance/saturation_dark_thr"    value="$(arg white_balance_saturation_dark_thr)"/>
-    <param name="white_balance/temporal_consistency"   value="$(arg white_balance_temporal_consistency)"/>
+    <param name="white_balance/method"                 value="$(arg white_balance/method)"/>
+    <param name="white_balance/clipping_percentile"    value="$(arg white_balance/clipping_percentile)"/>
+    <param name="white_balance/saturation_bright_thr"  value="$(arg white_balance/saturation_bright_thr)"/>
+    <param name="white_balance/saturation_dark_thr"    value="$(arg white_balance/saturation_dark_thr)"/>
+    <param name="white_balance/temporal_consistency"   value="$(arg white_balance/temporal_consistency)"/>
     
     <param name="color_calibration/enabled"            value="$(arg color_calibration/enabled)"/>
-    <param name="color_calibration/calibration_file"   value="$(arg color_calibration_file)"/>
+    <param name="color_calibration/calibration_file"   value="$(arg color_calibration/calibration_file)"/>
 
     <param name="gamma_correction/enabled"             value="$(arg gamma_correction/enabled)"/>
-    <param name="gamma_correction/method"              value="$(arg gamma_correction_method)"/>
-    <param name="gamma_correction/k"                   value="$(arg gamma_correction_k)"/>
+    <param name="gamma_correction/method"              value="$(arg gamma_correction/method)"/>
+    <param name="gamma_correction/k"                   value="$(arg gamma_correction/k)"/>
 
     <param name="vignetting_correction/enabled"        value="$(arg vignetting_correction/enabled)"/>
-    <param name="vignetting_correction/scale"          value="$(arg vignetting_correction_scale)"/>
-    <param name="vignetting_correction/a2"             value="$(arg vignetting_correction_a2)"/>
-    <param name="vignetting_correction/a4"             value="$(arg vignetting_correction_a4)"/>
+    <param name="vignetting_correction/scale"          value="$(arg vignetting_correction/scale)"/>
+    <param name="vignetting_correction/a2"             value="$(arg vignetting_correction/a2)"/>
+    <param name="vignetting_correction/a4"             value="$(arg vignetting_correction/a4)"/>
     
     <param name="color_enhancer/enabled"               value="$(arg color_enhancer/enabled)"/>
-    <param name="color_enhancer/saturation_gain"       value="$(arg color_enhancer_saturation_gain)"/>
+    <param name="color_enhancer/saturation_gain"       value="$(arg color_enhancer/saturation_gain)"/>
     
     <param name="undistortion/enabled"                 value="$(arg undistortion/enabled)"/>
-    <param name="undistortion/fov_scale"               value="$(arg undistortion_fov_scale)"/>
-    <param name="undistortion/calibration_file"        value="$(arg calibration_file)"/>
+    <param name="undistortion/balance"                 value="$(arg undistortion/balance)"/>
+    <param name="undistortion/fov_scale"               value="$(arg undistortion/fov_scale)"/>
+    <param name="undistortion/calibration_file"        value="$(arg undistortion/calibration_file)"/>
   </node>
 
 </launch>

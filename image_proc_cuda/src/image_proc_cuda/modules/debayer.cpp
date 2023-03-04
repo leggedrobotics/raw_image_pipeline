@@ -2,7 +2,7 @@
 
 namespace image_proc_cuda {
 
-DebayerModule::DebayerModule() : enabled_(true) {}
+DebayerModule::DebayerModule(bool use_gpu) : enabled_(true), use_gpu_(use_gpu) {}
 
 void DebayerModule::enable(bool enabled) {
   enabled_ = enabled;

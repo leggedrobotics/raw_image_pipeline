@@ -12,12 +12,11 @@
 #include <opencv2/cudawarping.hpp>
 #endif
 
+#include <yaml-cpp/yaml.h>
 #include <Eigen/Core>
 #include <Eigen/Dense>
-
-#include <yaml-cpp/yaml.h>
-
 #include <image_proc_cuda/utils.hpp>
+#include <memory>
 
 // Modules
 #include <image_proc_cuda/modules/color_calibration.hpp>
@@ -34,9 +33,9 @@ namespace image_proc_cuda {
 class ImageProcCuda {
  public:
   // Constructor & destructor
-  ImageProcCuda();
-  ImageProcCuda(const std::string& params_path, const std::string& calibration_path,
-                const std::string& color_calibration_path, bool use_gpu);
+  ImageProcCuda(bool use_gpu);
+  ImageProcCuda(bool use_gpu, const std::string& params_path, const std::string& calibration_path,
+                const std::string& color_calibration_path);
   ~ImageProcCuda();
 
   //-----------------------------------------------------------------------------
@@ -135,37 +134,33 @@ class ImageProcCuda {
   template <typename T>
   void pipeline(T& image, std::string& encoding) {
     // Run pipeline
-    debayer_.apply(image, encoding);
-    flipper_.apply(image, encoding);
-    white_balancer_.apply(image, encoding);
-    color_calibrator_.apply(image, encoding);
-    gamma_corrector_.apply(image, encoding);
-    vignetting_corrector_.apply(image, encoding);
-    color_enhancer_.apply(image, encoding);
-    undistorter_.apply(image, encoding);
+    debayer_->apply(image, encoding);
+    flipper_->apply(image);
+    white_balancer_->apply(image);
+    color_calibrator_->apply(image);
+    gamma_corrector_->apply(image);
+    vignetting_corrector_->apply(image);
+    color_enhancer_->apply(image);
+    undistorter_->apply(image);
   }
-  
+
   //-----------------------------------------------------------------------------
   // Modules
   //-----------------------------------------------------------------------------
-  ColorCalibrationModule color_calibrator_;
-  ColorEnhancerModule color_enhancer_;
-  DebayerModule debayer_;
-  FlipModule flipper_;
-  GammaCorrectionModule gamma_corrector_;
-  UndistortionModule undistorter_;
-  VignettingCorrectionModule vignetting_corrector_;
-  WhiteBalanceModule white_balancer_;
+  std::unique_ptr<ColorCalibrationModule> color_calibrator_;
+  std::unique_ptr<ColorEnhancerModule> color_enhancer_;
+  std::unique_ptr<DebayerModule> debayer_;
+  std::unique_ptr<FlipModule> flipper_;
+  std::unique_ptr<GammaCorrectionModule> gamma_corrector_;
+  std::unique_ptr<UndistortionModule> undistorter_;
+  std::unique_ptr<VignettingCorrectionModule> vignetting_corrector_;
+  std::unique_ptr<WhiteBalanceModule> white_balancer_;
 
   //-----------------------------------------------------------------------------
   // Other variables
   //-----------------------------------------------------------------------------
   // Pipeline options
   bool use_gpu_;
-
-  // Debug
-  bool dump_images_;
-  size_t idx_;
 };
 
 }  // namespace image_proc_cuda

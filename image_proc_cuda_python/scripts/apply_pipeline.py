@@ -18,7 +18,7 @@ def main():
     param_file = rospack.get_path("image_proc_cuda") + "/config/pipeline_params_example.yaml"
 
     # Create image Proc
-    proc = ImageProcCuda(param_file, calib_file, color_calib_file, False)
+    proc = ImageProcCuda(True, param_file, calib_file, color_calib_file)
 
     # Uncomment below to show calibration data
     print("Original parameters:")

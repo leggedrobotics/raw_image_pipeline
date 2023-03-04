@@ -2,7 +2,8 @@
 
 namespace image_proc_cuda {
 
-WhiteBalanceModule::WhiteBalanceModule() : enabled_(true), method_("ccc") {
+WhiteBalanceModule::WhiteBalanceModule(bool use_gpu) : enabled_(true), use_gpu_(use_gpu), method_("ccc") {
+  ccc_ = std::make_unique<image_proc_white_balance::ConvolutionalColorConstancyWB>(use_gpu);
 }
 
 void WhiteBalanceModule::enable(bool enabled) {
@@ -18,9 +19,6 @@ bool WhiteBalanceModule::enabled() const {
 //-----------------------------------------------------------------------------
 void WhiteBalanceModule::setMethod(const std::string& method) {
   method_ = method;
-  // if (method_ == "ccc") {
-  //   cccWBPtr_ = std::make_shared<image_proc_white_balance::ConvolutionalColorConstancyWB>();
-  // }
 }
 
 void WhiteBalanceModule::setSaturationPercentile(const double& percentile) {
@@ -39,7 +37,7 @@ void WhiteBalanceModule::setTemporalConsistency(bool enabled) {
 void WhiteBalanceModule::resetTemporalConsistency() {
   if (method_ == "ccc") {
     // cccWBPtr_->resetTemporalConsistency();
-    ccc_.resetTemporalConsistency();
+    ccc_->resetTemporalConsistency();
   }
 }
 

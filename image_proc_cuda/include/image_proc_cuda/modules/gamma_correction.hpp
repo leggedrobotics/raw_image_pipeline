@@ -13,7 +13,7 @@ namespace image_proc_cuda {
 
 class GammaCorrectionModule {
  public:
-  GammaCorrectionModule();
+  GammaCorrectionModule(bool use_gpu);
   void enable(bool enabled);
   bool enabled() const;
 
@@ -27,7 +27,7 @@ class GammaCorrectionModule {
   // Main interface
   //-----------------------------------------------------------------------------
   template <typename T>
-  bool apply(T& image, std::string& encoding) {
+  bool apply(T& image) {
     if (!enabled_) {
       return false;
     }
@@ -45,22 +45,35 @@ class GammaCorrectionModule {
   void gammaCorrectCustom(cv::Mat& image);
   void gammaCorrectDefault(cv::Mat& image);
 
-//-----------------------------------------------------------------------------
-// Wrapper methods (GPU)
-//-----------------------------------------------------------------------------
+  //-----------------------------------------------------------------------------
+  // Wrapper methods (GPU)
+  //-----------------------------------------------------------------------------
 #ifdef HAS_CUDA
   void gammaCorrectCustom(cv::cuda::GpuMat& image);
   void gammaCorrectDefault(cv::cuda::GpuMat& image);
 #endif
 
   //-----------------------------------------------------------------------------
+  // Helper methods (CPU)
+  //-----------------------------------------------------------------------------
+  void init();
+
+  //-----------------------------------------------------------------------------
   // Variables
   //-----------------------------------------------------------------------------
   bool enabled_;
+  bool use_gpu_;
 
   std::string method_;
   bool is_forward_;
   double k_;
-};  // namespace image_proc_cuda
+
+  // LUT
+  cv::Mat cpu_lut_;
+
+#ifdef HAS_CUDA
+  cv::Ptr<cv::cuda::LookUpTable> gpu_lut_;
+#endif
+};
 
 }  // namespace image_proc_cuda

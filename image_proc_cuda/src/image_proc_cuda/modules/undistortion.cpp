@@ -2,7 +2,7 @@
 
 namespace image_proc_cuda {
 
-UndistortionModule::UndistortionModule() : enabled_(true), rect_balance_(0.0), rect_fov_scale_(1.0) {}
+UndistortionModule::UndistortionModule(bool use_gpu) : enabled_(true), use_gpu_(use_gpu), rect_balance_(0.0), rect_fov_scale_(1.0) {}
 
 void UndistortionModule::enable(bool enabled) {
   enabled_ = enabled;
@@ -218,15 +218,17 @@ void UndistortionModule::init() {
   }
 
 #ifdef HAS_CUDA
-  // Upload everything to GPU
-  gpu_undistortion_map_x_.upload(undistortion_map_x_);
-  gpu_undistortion_map_y_.upload(undistortion_map_y_);
+  if (use_gpu_) {
+    // Upload everything to GPU
+    gpu_undistortion_map_x_.upload(undistortion_map_x_);
+    gpu_undistortion_map_y_.upload(undistortion_map_y_);
+  }
 #endif
 }
 
 void UndistortionModule::undistort(cv::Mat& image) {
   cv::Mat out;
-  cv::remap(image, out, undistortion_map_x_, undistortion_map_y_, cv::InterpolationFlags::INTER_LINEAR, cv::BorderTypes::BORDER_REPLICATE);
+  cv::remap(image, out, undistortion_map_x_, undistortion_map_y_, cv::InterpolationFlags::INTER_LINEAR, cv::BorderTypes::BORDER_CONSTANT, 0);
   image = out;
 }
 
@@ -237,8 +239,7 @@ void UndistortionModule::saveUndistortedImage(cv::Mat& image) {
 #ifdef HAS_CUDA
 void UndistortionModule::undistort(cv::cuda::GpuMat& image) {
   cv::cuda::GpuMat out;
-  cv::cuda::remap(image, out, gpu_undistortion_map_x_, gpu_undistortion_map_y_, cv::InterpolationFlags::INTER_LINEAR,
-                  cv::BorderTypes::BORDER_REPLICATE);
+  cv::cuda::remap(image, out, gpu_undistortion_map_x_, gpu_undistortion_map_y_, cv::InterpolationFlags::INTER_LINEAR, cv::BORDER_CONSTANT, 0);
   image = out;
 }
 

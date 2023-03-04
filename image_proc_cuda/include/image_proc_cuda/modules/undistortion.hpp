@@ -17,7 +17,7 @@ namespace image_proc_cuda {
 
 class UndistortionModule {
  public:
-  UndistortionModule();
+  UndistortionModule(bool use_gpu);
   void enable(bool enabled);
   bool enabled() const;
 
@@ -61,7 +61,7 @@ class UndistortionModule {
   // Main interface
   //-----------------------------------------------------------------------------
   template <typename T>
-  bool apply(T& image, std::string& encoding) {
+  bool apply(T& image) {
     saveUndistortedImage(image);
     if (!enabled_) {
       return false;
@@ -77,7 +77,7 @@ class UndistortionModule {
   }
 
   //-----------------------------------------------------------------------------
-  // Helper methods (CPU)
+  // Helper methods
   //-----------------------------------------------------------------------------
  public:
   void loadCalibration(const std::string& file_path);
@@ -96,6 +96,7 @@ class UndistortionModule {
   // Variables
   //-----------------------------------------------------------------------------
   bool enabled_;
+  bool use_gpu_;
 
   // Calibration & undistortion
   bool calibration_available_;

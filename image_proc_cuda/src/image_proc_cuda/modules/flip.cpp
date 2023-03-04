@@ -2,7 +2,7 @@
 
 namespace image_proc_cuda {
 
-FlipModule::FlipModule() : enabled_(true) {}
+FlipModule::FlipModule(bool use_gpu) : enabled_(true), use_gpu_(use_gpu) {}
 
 void FlipModule::enable(bool enabled) {
   enabled_ = enabled;

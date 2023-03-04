@@ -13,7 +13,7 @@ namespace image_proc_cuda {
 
 class VignettingCorrectionModule {
  public:
-  VignettingCorrectionModule();
+  VignettingCorrectionModule(bool use_gpu);
   void enable(bool enabled);
   bool enabled() const;
 
@@ -21,7 +21,7 @@ class VignettingCorrectionModule {
   // Main interface
   //-----------------------------------------------------------------------------
   template <typename T>
-  bool apply(T& image, std::string& encoding) {
+  bool apply(T& image) {
     if (!enabled_) {
       return false;
     }
@@ -49,6 +49,7 @@ class VignettingCorrectionModule {
   // Variables
   //-----------------------------------------------------------------------------
   bool enabled_;
+  bool use_gpu_;
 
   double vignetting_correction_scale_;
   double vignetting_correction_a2_;

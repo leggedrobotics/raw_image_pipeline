@@ -2,7 +2,7 @@
 
 namespace image_proc_cuda {
 
-VignettingCorrectionModule::VignettingCorrectionModule() : enabled_(true) {}
+VignettingCorrectionModule::VignettingCorrectionModule(bool use_gpu) : enabled_(true), use_gpu_(use_gpu) {}
 
 void VignettingCorrectionModule::enable(bool enabled) {
   enabled_ = enabled;
@@ -51,7 +51,9 @@ void VignettingCorrectionModule::precomputeVignettingMask(int height, int width)
 
 // Upload to gpu
 #ifdef HAS_CUDA
-  gpu_vignetting_mask_f_.upload(vignetting_mask_f_);
+  if (use_gpu_) {
+    gpu_vignetting_mask_f_.upload(vignetting_mask_f_);
+  }
 #endif
 }
 

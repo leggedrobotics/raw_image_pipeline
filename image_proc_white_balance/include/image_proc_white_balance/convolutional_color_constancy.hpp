@@ -28,32 +28,33 @@ namespace image_proc_white_balance {
 class ConvolutionalColorConstancyWB {
  private:
   // Model
-    template <typename T>
-    struct Model {
-      int width_;
-      int height_;
-      T hist_;
-      T filter_;
-      T bias_;
-      T response_;
-      T hist_fft_;
-      T filter_fft_;
-      T bias_fft_;
-      T response_fft_;
-    };
+  template <typename T>
+  struct Model {
+    int width_;
+    int height_;
+    T hist_;
+    T filter_;
+    T bias_;
+    T response_;
+    T hist_fft_;
+    T filter_fft_;
+    T bias_fft_;
+    T response_fft_;
+  };
 
-    Model<cv::Mat> model_;
-  #ifdef HAS_CUDA
-    Model<cv::cuda::GpuMat> gpu_model_;
-  #endif
+  Model<cv::Mat> model_;
+#ifdef HAS_CUDA
+  Model<cv::cuda::GpuMat> gpu_model_;
+#endif
 
   // Model filename
+  bool use_gpu_;
   std::string model_filename_;
 
   // Image histogram
+  cv::Size small_size_;
   float bin_size_;
   float uv0_;
-  cv::Size small_size_;
 
   // Output variables
   cv::Point uv_pos_;
@@ -107,8 +108,8 @@ class ConvolutionalColorConstancyWB {
 #endif
 
  public:
-  ConvolutionalColorConstancyWB(const std::string& filename);
-  ConvolutionalColorConstancyWB();
+  ConvolutionalColorConstancyWB(bool use_gpu);
+  ConvolutionalColorConstancyWB(bool use_gpu, const std::string& filename);
   ~ConvolutionalColorConstancyWB();
 
 // Applies white balance

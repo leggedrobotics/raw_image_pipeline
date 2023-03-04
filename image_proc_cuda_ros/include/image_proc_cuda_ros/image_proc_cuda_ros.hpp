@@ -10,9 +10,10 @@
 #include <sensor_msgs/distortion_models.h>
 #include <std_srvs/Trigger.h>
 
+#include <opencv2/opencv.hpp>
 #include <Eigen/Core>
 #include <Eigen/Dense>
-#include <opencv2/opencv.hpp>
+#include <memory>
 
 #include <image_proc_cuda/image_proc_cuda.hpp>
 
@@ -23,17 +24,17 @@ class ImageProcCudaRos {
   ImageProcCudaRos(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private);
   ~ImageProcCudaRos();
 
-  // Setup methods
-  void setupSubAndPub();
-  void setupRosParams();
-
   // Starts the node
   bool run();
+
+ private:
+  // Setup methods
+  void loadParams();
+  void setupRos();
 
   // Main callback method
   void imageCallback(const sensor_msgs::ImageConstPtr& image);
 
- private:
   // Publishers
   void publishColorImage(const cv_bridge::CvImagePtr& cv_ptr_processed,                                // Processed image
                          const sensor_msgs::ImageConstPtr& orig_image,                                 // Original image
@@ -108,7 +109,7 @@ class ImageProcCudaRos {
   int skipped_images_for_slow_topic_rect_;
 
   // Postprocessing pipeline
-  ImageProcCuda image_proc_;
+  std::unique_ptr<ImageProcCuda> image_proc_;
 };
 
 }  // namespace image_proc_cuda

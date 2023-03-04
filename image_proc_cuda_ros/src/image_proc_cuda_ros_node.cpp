@@ -9,9 +9,6 @@ int main(int argc, char** argv)
   ros::NodeHandle nh_priv("~");
 
   image_proc_cuda::ImageProcCudaRos image_proc(nh, nh_priv);
-
-  image_proc.setupRosParams();
-  image_proc.setupSubAndPub();
   image_proc.run();
   
   ros::waitForShutdown();

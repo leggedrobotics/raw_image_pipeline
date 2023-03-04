@@ -13,7 +13,7 @@ namespace image_proc_cuda {
 
 class ColorEnhancerModule {
  public:
-  ColorEnhancerModule();
+  ColorEnhancerModule(bool use_gpu);
   void enable(bool enabled);
   bool enabled() const;
 
@@ -28,7 +28,7 @@ class ColorEnhancerModule {
   // Main interface
   //-----------------------------------------------------------------------------
   template <typename T>
-  bool apply(T& image, std::string& encoding) {
+  bool apply(T& image) {
     if (!enabled_) {
       return false;
     }
@@ -52,6 +52,8 @@ class ColorEnhancerModule {
   // Variables
   //-----------------------------------------------------------------------------
   bool enabled_;
+  bool use_gpu_;
+
   double value_gain_;
   double saturation_gain_;
   double hue_gain_;

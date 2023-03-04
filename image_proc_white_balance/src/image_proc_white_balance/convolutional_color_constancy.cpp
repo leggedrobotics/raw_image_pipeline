@@ -13,8 +13,9 @@ Author: Matias Mattamala
 #define DEFAULT_MODEL_PATH (FILE_FOLDER + "/../../model/default.bin")
 
 namespace image_proc_white_balance {
-ConvolutionalColorConstancyWB::ConvolutionalColorConstancyWB()
-    : model_filename_(DEFAULT_MODEL_PATH),
+ConvolutionalColorConstancyWB::ConvolutionalColorConstancyWB(bool use_gpu)
+    : use_gpu_(use_gpu),
+      model_filename_(DEFAULT_MODEL_PATH),
       small_size_(360, 270),
       bin_size_(1.0f / 64.0f),
       uv0_(-1.421875),
@@ -31,13 +32,13 @@ ConvolutionalColorConstancyWB::ConvolutionalColorConstancyWB()
   kf_ptr_ = std::make_shared<cv::KalmanFilter>(2, 2, 0, CV_32F);
 }
 
-ConvolutionalColorConstancyWB::ConvolutionalColorConstancyWB(const std::string& filename)
-    : ConvolutionalColorConstancyWB::ConvolutionalColorConstancyWB() {
+ConvolutionalColorConstancyWB::ConvolutionalColorConstancyWB(bool use_gpu, const std::string& filename)
+    : ConvolutionalColorConstancyWB::ConvolutionalColorConstancyWB(use_gpu) {
+  model_filename_ = filename;
   loadModel(model_filename_);
 }
 
-ConvolutionalColorConstancyWB::~ConvolutionalColorConstancyWB() {
-}
+ConvolutionalColorConstancyWB::~ConvolutionalColorConstancyWB() {}
 
 #ifdef HAS_CUDA
 void ConvolutionalColorConstancyWB::balanceWhite(const cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst) {
@@ -45,14 +46,11 @@ void ConvolutionalColorConstancyWB::balanceWhite(const cv::cuda::GpuMat& src, cv
   src.copyTo(dst);
   cv::Mat src_cpu;
   src.download(src_cpu);
-  std::cout << "src size: " << src.size() << std::endl;
-  std::cout << "src_cpu_size: " << src_cpu.size() << std::endl;
-  std::cout << "small_size: " << small_size_ << std::endl;
+
   // Resize image
   cv::Mat small_image;
   cv::resize(src_cpu, small_image, small_size_);
-  // cv::resize(src_cpu, small_image, src_cpu.size() / 2);
-  
+
   // Convert to floating point
   cv::Mat small_image_f;
   small_image.convertTo(small_image_f, CV_32F);
@@ -90,8 +88,7 @@ void ConvolutionalColorConstancyWB::balanceWhite(const cv::cuda::GpuMat& src, cv
 void ConvolutionalColorConstancyWB::balanceWhite(const cv::Mat& src, cv::Mat& dst) {
   // Copy input to output
   src.copyTo(dst);
-  std::cout << src.size() << std::endl;
-  std::cout << small_size_ << std::endl;
+
   // Resize image
   cv::Mat small_image;
   cv::resize(src, small_image, small_size_);
@@ -155,25 +152,25 @@ int ConvolutionalColorConstancyWB::loadModel(const std::string& model_file) {
   cv::dft(model_.bias_, model_.bias_fft_, 0, model_.height_);
 
 #ifdef HAS_CUDA
-  // upload to GPU
-  gpu_model_.filter_.upload(model_.filter_);
-  gpu_model_.bias_.upload(model_.bias_);
+  if (use_gpu_) {
+    // upload to GPU
+    gpu_model_.filter_.upload(model_.filter_);
+    gpu_model_.bias_.upload(model_.bias_);
 
-  // Preallocate FFT variables
-  gpu_model_.filter_fft_.create(model_.height_, model_.width_, CV_32FC2);
-  gpu_model_.bias_fft_.create(model_.height_, model_.width_, CV_32FC2);
-  gpu_model_.hist_fft_.create(model_.height_, model_.width_, CV_32FC2);
-  gpu_model_.response_fft_.create(model_.height_, model_.width_, CV_32FC2);
-  gpu_model_.response_.create(model_.height_, model_.width_, CV_32FC2);
-  cv::cuda::dft(gpu_model_.filter_, gpu_model_.filter_fft_, cv::Size(model_.width_, model_.height_));
-  cv::cuda::dft(gpu_model_.bias_, gpu_model_.bias_fft_, cv::Size(model_.width_, model_.height_));
+    // Preallocate FFT variables
+    gpu_model_.filter_fft_.create(model_.height_, model_.width_, CV_32FC2);
+    gpu_model_.bias_fft_.create(model_.height_, model_.width_, CV_32FC2);
+    gpu_model_.hist_fft_.create(model_.height_, model_.width_, CV_32FC2);
+    gpu_model_.response_fft_.create(model_.height_, model_.width_, CV_32FC2);
+    gpu_model_.response_.create(model_.height_, model_.width_, CV_32FC2);
+    cv::cuda::dft(gpu_model_.filter_, gpu_model_.filter_fft_, cv::Size(model_.width_, model_.height_));
+    cv::cuda::dft(gpu_model_.bias_, gpu_model_.bias_fft_, cv::Size(model_.width_, model_.height_));
 
-  // Preallocate histograms
-  gpu_model_.hist_.create(model_.width_, model_.height_, CV_32F);
-  gpu_model_.hist_.setTo(cv::Scalar(0.f));
+    // Preallocate histograms
+    gpu_model_.hist_.create(model_.width_, model_.height_, CV_32F);
+    gpu_model_.hist_.setTo(cv::Scalar(0.f));
+  }
 #endif
-  std::cout << "END CUDA INIT" << std::endl;
-
   // Compute uv coordinates
   uv_pos_ = cv::Point(model_.height_ / 2, model_.width_ / 2);
 
@@ -314,9 +311,9 @@ int ConvolutionalColorConstancyWB::kalmanFiltering() {
     kf_measurement_.at<float>(1) = uv_pos_.y;
 
     // Outlier detection
-    constexpr double chi2_2dof_001 = 11.345;
-    cv::Mat innovation = kf_measurement_ - kf_H_ * pred;
-    double chi2 = innovation.dot(kf_inv_H_cov_ * innovation);
+    // constexpr double chi2_2dof_001 = 11.345;
+    // cv::Mat innovation = kf_measurement_ - kf_H_ * pred;
+    // double chi2 = innovation.dot(kf_inv_H_cov_ * innovation);
     // std::cout << "kf_measurement_" << kf_measurement_ << std::endl;
     // std::cout << "pred" << pred << std::endl;
     // std::cout << "kf_H_" << kf_H_ << std::endl;

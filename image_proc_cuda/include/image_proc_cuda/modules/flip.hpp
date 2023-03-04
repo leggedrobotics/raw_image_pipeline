@@ -13,7 +13,7 @@ namespace image_proc_cuda {
 
 class FlipModule {
  public:
-  FlipModule();
+  FlipModule(bool use_gpu);
   void enable(bool enabled);
   bool enabled() const;
 
@@ -21,7 +21,7 @@ class FlipModule {
   // Main interface
   //-----------------------------------------------------------------------------
   template <typename T>
-  bool apply(T& image, std::string& encoding) {
+  bool apply(T& image) {
     if (!enabled_) {
       return false;
     }
@@ -42,6 +42,7 @@ class FlipModule {
   // Variables
   //-----------------------------------------------------------------------------
   bool enabled_;
+  bool use_gpu_;
 };
 
 }  // namespace image_proc_cuda

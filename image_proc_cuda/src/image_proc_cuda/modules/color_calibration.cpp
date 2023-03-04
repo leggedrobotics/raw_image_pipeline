@@ -2,7 +2,7 @@
 
 namespace image_proc_cuda {
 
-ColorCalibrationModule::ColorCalibrationModule() : enabled_(true) {
+ColorCalibrationModule::ColorCalibrationModule(bool use_gpu) : enabled_(true), use_gpu_(use_gpu) {
   cv::Matx33d matrix = cv::Matx33d::eye();
   initCalibrationMatrix(matrix);
 }
@@ -57,21 +57,25 @@ void ColorCalibrationModule::initCalibrationMatrix(const cv::Matx33d& matrix) {
   color_calibration_matrix_ = matrix;
 
 #ifdef HAS_CUDA
-  for (size_t i = 0; i < 3; i++)
-    for (size_t j = 0; j < 3; j++) {
-      gpu_color_calibration_matrix_[i][j] = static_cast<float>(matrix(i, j));
-    }
+  if (use_gpu_) {
+    for (size_t i = 0; i < 3; i++)
+      for (size_t j = 0; j < 3; j++) {
+        gpu_color_calibration_matrix_[i][j] = static_cast<float>(matrix(i, j));
+      }
+  }
 #endif
 }
 
 void ColorCalibrationModule::colorCorrection(cv::Mat& image) {
+  // https://stackoverflow.com/a/12678457
   cv::Mat flat_image = image.reshape(1, image.rows * image.cols);
   cv::Mat flat_image_f;
   flat_image.convertTo(flat_image_f, CV_32F);
 
   // Mix
-  cv::Mat mixed_image = flat_image_f * color_calibration_matrix_;
+  cv::Mat mixed_image = flat_image_f * color_calibration_matrix_.t();
   cv::Mat image_f = mixed_image.reshape(3, image.rows);
+
   image_f.convertTo(image, CV_8UC3);
 }
 

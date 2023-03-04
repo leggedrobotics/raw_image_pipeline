@@ -13,7 +13,7 @@ namespace image_proc_cuda {
 
 class DebayerModule {
  public:
-  DebayerModule();
+  DebayerModule(bool use_gpu);
   void enable(bool enabled);
   bool enabled() const;
 
@@ -52,6 +52,8 @@ class DebayerModule {
   // Variables
   //-----------------------------------------------------------------------------
   bool enabled_;
+  bool use_gpu_;
+
   std::string encoding_;
 
   std::vector<std::string> BAYER_TYPES = {"bayer_bggr8",
