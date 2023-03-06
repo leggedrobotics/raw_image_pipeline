@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>raw_image_pipeline_python</name>
+  <version>0.0.0</version>
+  <description>Python bindings of raw_image_pipeline</description>
+
+  <author email="matias@robots.ox.ac.uk">Matias Mattamala</author>
+  <maintainer email="matias@robots.ox.ac.uk">Matias Mattamala</maintainer>
+
+  <license>Proprietary</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>raw_image_pipeline</depend>
+  <depend>pybind11_catkin</depend>
+  
+</package>
