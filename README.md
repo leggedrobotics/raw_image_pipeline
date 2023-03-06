@@ -27,6 +27,18 @@ For further information you can refer the [official manual](https://github.com/s
 3. **`raw_image_pipeline_ros`**: ROS interface to run the processing pipeline.
 4. **`raw_image_pipeline_white_balance`**: Additional white balance algorithm built upon Shane Yuan's [code](https://github.com/yuanxy92/AutoWhiteBalance), based on Barron's ([1](https://arxiv.org/abs/1507.00410), [2](https://arxiv.org/abs/1611.07596)).
 
+## Pipeline
+
+The package implements diferent modules that are chained together to process the RAW images. Each can be disabled and the image will be processed by the subsequent modules.
+* **Debayer**: `auto`, `bayer_bggr8`, `bayer_gbrg8`, `bayer_grbg8`, `bayer_rggb8`
+* **White balance**: `simple`, `grey_world`, `learned` (from [OpenCV](https://docs.opencv.org/4.x/df/db9/namespacecv_1_1xphoto.html)), `ccc` (from `raw_image_pipeline_white_balance` package), `pca` (custom implementation)
+* **Color correction**: Simple color correction based on a mixing BGR 3x3 matrix.
+* **Gamma correction**: `default` (from OpenCV), `custom` (custom implementation)
+* **Vignetting correction**: Removes the darkening effect of the lens toward the edges of the image by applying a polynomial mask.
+* **Color enhancement**: Converts the image to HSV and applies a gain to the S (saturation) channel.
+* **Undistortion**: Corrects the image given the camera calibration file.
+
+
 ## Requirements and compilation
 ### Dependencies
 
@@ -107,17 +119,3 @@ roslaunch raw_image_pipeline_ros raw_image_pipeline_node.launch
 ```
 
 This launchfile was setup for Alphasense cameras. The parameters can be inspected in the [launch file itself](raw_image_pipeline_ros/launch/raw_image_pipeline_node.launch).
-
-
-## Pipeline explanation
-
-The `raw_image_pipeline` pipeline implements the following structure:
-
-<img src="docs/debayer_cuda_pipeline.png" alt="debayer_cuda pipeline" width="1000"/>
-
-Modules can be disabled (except debayer) and the image will be processed by the subsequent modules. The modules available are:
-* **Debayer**: `auto`, `bayer_bggr8`, `bayer_gbrg8`, `bayer_grbg8`, `bayer_rggb8`
-* **white balance**: `simple`, `grey_world`, `learned` (from [OpenCV](https://docs.opencv.org/4.x/df/db9/namespacecv_1_1xphoto.html)), `ccc` (from `raw_image_pipeline_white_balance` package), `pca` (custom implementation)
-* **Gamma correction**: `default` (from OpenCV), `custom` (custom implementation)
-* **Vignetting correction**: Removes the darkening effect of the lens toward the edges of the image by applying a polynomial mask.
-* **Color enhancement**: Converts the image to HSV and applies a gain to the S (saturation) channel.
