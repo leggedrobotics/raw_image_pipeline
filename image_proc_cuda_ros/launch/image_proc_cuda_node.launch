@@ -20,6 +20,10 @@
   <arg name="undistortion/enabled"                 default="true"/>
 
   <!-- Camera -->
+  <arg name="cam0"                                 default="true"/>
+  <arg name="cam1"                                 default="false"/>
+  <arg name="cam2"                                 default="false"/>
+
   <!-- Debayer  -->
   <arg name="debayer_encoding"                     default="auto"/>  <!-- auto, bayer_bggr8, bayer_gbrg8, bayer_grbg8, bayer_rggb8-->
   <!-- White balance options -->
@@ -42,20 +46,34 @@
   <arg name="undistortion/fov_scale"               default="1.2"/> <!-- scale > 1.0 increases the FoV -->
 
   <!-- Per camera options -->
-  <arg name="input_topic"                         default="alphasense_driver_ros/cam4"/>
-  <arg name="output_topic"                        default="alphasense_driver_ros/cam4/debayered"/>
-  <arg name="output_frame"                        default="cam0_sensor_frame_helper"/>
+  <arg name="input_topic0"                         default="alphasense_driver_ros/cam0"/>
+  <arg name="output_topic0"                        default="alphasense_driver_ros/cam0/debayered"/>
+  <arg name="output_frame0"                        default="cam0_sensor_frame_helper"/>
   
-  <arg name="undistortion/calibration_file"       default="$(find image_proc_cuda)/config/alphasense_calib_example.yaml"/>
-  <arg name="color_calibration/calibration_file"  default="$(find image_proc_cuda)/config/alphasense_color_calib_example.yaml"/>
+  <arg name="undistortion/calibration_file0"       default="$(find image_proc_cuda)/config/alphasense_calib_example.yaml"/>
+  <arg name="color_calibration/calibration_file0"  default="$(find image_proc_cuda)/config/alphasense_color_calib_example.yaml"/>
+
+  <arg name="input_topic1"                         default="alphasense_driver_ros/cam1"/>
+  <arg name="output_topic1"                        default="alphasense_driver_ros/cam1/debayered"/>
+  <arg name="output_frame1"                        default="cam1_sensor_frame_helper"/>
   
+  <arg name="undistortion/calibration_file1"       default="$(find image_proc_cuda)/config/alphasense_calib_example.yaml"/>
+  <arg name="color_calibration/calibration_file1"  default="$(find image_proc_cuda)/config/alphasense_color_calib_example.yaml"/>
+
+  <arg name="input_topic2"                         default="alphasense_driver_ros/cam2"/>
+  <arg name="output_topic2"                        default="alphasense_driver_ros/cam2/debayered"/>
+  <arg name="output_frame2"                        default="cam1_sensor_frame_helper"/>
+  
+  <arg name="undistortion/calibration_file2"       default="$(find image_proc_cuda)/config/alphasense_calib_example.yaml"/>
+  <arg name="color_calibration/calibration_file2"  default="$(find image_proc_cuda)/config/alphasense_color_calib_example.yaml"/>
+
   <!-- Nodes -->
   <!-- <rosparam command="load" file="$(arg calibration_cam0)" ns="image_proc_cuda_ros_node_cam0"/> -->
-  <node name="image_proc_cuda_ros_node_$(arg camera_name)" type="image_proc_cuda_ros_node" pkg="image_proc_cuda_ros" output="screen" launch-prefix="$(arg launch_prefix)">
-    <param name="input_topic"                          value="$(arg input_topic)"/>
-    <param name="output_topic"                         value="$(arg output_topic)"/>
+  <node if="$(arg cam0)" name="image_proc_cuda_ros_node_cam0" type="image_proc_cuda_ros_node" pkg="image_proc_cuda_ros" output="screen" launch-prefix="$(arg launch_prefix)">
+    <param name="input_topic"                          value="$(arg input_topic0)"/>
+    <param name="output_topic"                         value="$(arg output_topic0)"/>
     <param name="output_encoding"                      value="$(arg output_encoding)"/>
-    <param name="output_frame"                         value="$(arg output_frame)"/>
+    <param name="output_frame"                         value="$(arg output_frame0)"/>
     <param name="skip_number_of_images_for_slow_topic" value="$(arg skip_number_of_images_for_slow_topic)"/>
     <param name="use_gpu"                              value="$(arg use_gpu)"/>
     
@@ -72,7 +90,7 @@
     <param name="white_balance/temporal_consistency"   value="$(arg white_balance/temporal_consistency)"/>
     
     <param name="color_calibration/enabled"            value="$(arg color_calibration/enabled)"/>
-    <param name="color_calibration/calibration_file"   value="$(arg color_calibration/calibration_file)"/>
+    <param name="color_calibration/calibration_file"   value="$(arg color_calibration/calibration_file0)"/>
 
     <param name="gamma_correction/enabled"             value="$(arg gamma_correction/enabled)"/>
     <param name="gamma_correction/method"              value="$(arg gamma_correction/method)"/>
@@ -89,7 +107,90 @@
     <param name="undistortion/enabled"                 value="$(arg undistortion/enabled)"/>
     <param name="undistortion/balance"                 value="$(arg undistortion/balance)"/>
     <param name="undistortion/fov_scale"               value="$(arg undistortion/fov_scale)"/>
-    <param name="undistortion/calibration_file"        value="$(arg undistortion/calibration_file)"/>
+    <param name="undistortion/calibration_file"        value="$(arg undistortion/calibration_file0)"/>
+  </node>
+
+
+  <node if="$(arg cam1)" name="image_proc_cuda_ros_node_cam1" type="image_proc_cuda_ros_node" pkg="image_proc_cuda_ros" output="screen" launch-prefix="$(arg launch_prefix)">
+    <param name="input_topic"                          value="$(arg input_topic1)"/>
+    <param name="output_topic"                         value="$(arg output_topic1)"/>
+    <param name="output_encoding"                      value="$(arg output_encoding)"/>
+    <param name="output_frame"                         value="$(arg output_frame1)"/>
+    <param name="skip_number_of_images_for_slow_topic" value="$(arg skip_number_of_images_for_slow_topic)"/>
+    <param name="use_gpu"                              value="$(arg use_gpu)"/>
+    
+    <param name="debayer/enabled"                      value="$(arg debayer/enabled)"/>
+    <param name="debayer/encoding"                     value="$(arg debayer_encoding)"/>
+
+    <param name="flip/enabled"                         value="$(arg flip/enabled)"/>
+    
+    <param name="white_balance/enabled"                value="$(arg white_balance/enabled)"/>
+    <param name="white_balance/method"                 value="$(arg white_balance/method)"/>
+    <param name="white_balance/clipping_percentile"    value="$(arg white_balance/clipping_percentile)"/>
+    <param name="white_balance/saturation_bright_thr"  value="$(arg white_balance/saturation_bright_thr)"/>
+    <param name="white_balance/saturation_dark_thr"    value="$(arg white_balance/saturation_dark_thr)"/>
+    <param name="white_balance/temporal_consistency"   value="$(arg white_balance/temporal_consistency)"/>
+    
+    <param name="color_calibration/enabled"            value="$(arg color_calibration/enabled)"/>
+    <param name="color_calibration/calibration_file"   value="$(arg color_calibration/calibration_file1)"/>
+
+    <param name="gamma_correction/enabled"             value="$(arg gamma_correction/enabled)"/>
+    <param name="gamma_correction/method"              value="$(arg gamma_correction/method)"/>
+    <param name="gamma_correction/k"                   value="$(arg gamma_correction/k)"/>
+
+    <param name="vignetting_correction/enabled"        value="$(arg vignetting_correction/enabled)"/>
+    <param name="vignetting_correction/scale"          value="$(arg vignetting_correction/scale)"/>
+    <param name="vignetting_correction/a2"             value="$(arg vignetting_correction/a2)"/>
+    <param name="vignetting_correction/a4"             value="$(arg vignetting_correction/a4)"/>
+    
+    <param name="color_enhancer/enabled"               value="$(arg color_enhancer/enabled)"/>
+    <param name="color_enhancer/saturation_gain"       value="$(arg color_enhancer/saturation_gain)"/>
+    
+    <param name="undistortion/enabled"                 value="$(arg undistortion/enabled)"/>
+    <param name="undistortion/balance"                 value="$(arg undistortion/balance)"/>
+    <param name="undistortion/fov_scale"               value="$(arg undistortion/fov_scale)"/>
+    <param name="undistortion/calibration_file"        value="$(arg undistortion/calibration_file1)"/>
+  </node>
+
+  <node if="$(arg cam2)" name="image_proc_cuda_ros_node_cam2" type="image_proc_cuda_ros_node" pkg="image_proc_cuda_ros" output="screen" launch-prefix="$(arg launch_prefix)">
+    <param name="input_topic"                          value="$(arg input_topic2)"/>
+    <param name="output_topic"                         value="$(arg output_topic2)"/>
+    <param name="output_encoding"                      value="$(arg output_encoding)"/>
+    <param name="output_frame"                         value="$(arg output_frame2)"/>
+    <param name="skip_number_of_images_for_slow_topic" value="$(arg skip_number_of_images_for_slow_topic)"/>
+    <param name="use_gpu"                              value="$(arg use_gpu)"/>
+    
+    <param name="debayer/enabled"                      value="$(arg debayer/enabled)"/>
+    <param name="debayer/encoding"                     value="$(arg debayer_encoding)"/>
+
+    <param name="flip/enabled"                         value="$(arg flip/enabled)"/>
+    
+    <param name="white_balance/enabled"                value="$(arg white_balance/enabled)"/>
+    <param name="white_balance/method"                 value="$(arg white_balance/method)"/>
+    <param name="white_balance/clipping_percentile"    value="$(arg white_balance/clipping_percentile)"/>
+    <param name="white_balance/saturation_bright_thr"  value="$(arg white_balance/saturation_bright_thr)"/>
+    <param name="white_balance/saturation_dark_thr"    value="$(arg white_balance/saturation_dark_thr)"/>
+    <param name="white_balance/temporal_consistency"   value="$(arg white_balance/temporal_consistency)"/>
+    
+    <param name="color_calibration/enabled"            value="$(arg color_calibration/enabled)"/>
+    <param name="color_calibration/calibration_file"   value="$(arg color_calibration/calibration_file2)"/>
+
+    <param name="gamma_correction/enabled"             value="$(arg gamma_correction/enabled)"/>
+    <param name="gamma_correction/method"              value="$(arg gamma_correction/method)"/>
+    <param name="gamma_correction/k"                   value="$(arg gamma_correction/k)"/>
+
+    <param name="vignetting_correction/enabled"        value="$(arg vignetting_correction/enabled)"/>
+    <param name="vignetting_correction/scale"          value="$(arg vignetting_correction/scale)"/>
+    <param name="vignetting_correction/a2"             value="$(arg vignetting_correction/a2)"/>
+    <param name="vignetting_correction/a4"             value="$(arg vignetting_correction/a4)"/>
+    
+    <param name="color_enhancer/enabled"               value="$(arg color_enhancer/enabled)"/>
+    <param name="color_enhancer/saturation_gain"       value="$(arg color_enhancer/saturation_gain)"/>
+    
+    <param name="undistortion/enabled"                 value="$(arg undistortion/enabled)"/>
+    <param name="undistortion/balance"                 value="$(arg undistortion/balance)"/>
+    <param name="undistortion/fov_scale"               value="$(arg undistortion/fov_scale)"/>
+    <param name="undistortion/calibration_file"        value="$(arg undistortion/calibration_file2)"/>
   </node>
 
 </launch>
