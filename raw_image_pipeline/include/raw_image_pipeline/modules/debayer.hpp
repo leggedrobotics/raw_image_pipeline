@@ -25,7 +25,7 @@ class DebayerModule {
   //-----------------------------------------------------------------------------
   // Getters
   //-----------------------------------------------------------------------------
-  cv::Mat getDebayeredImage() const;
+  cv::Mat getImage() const;
 
   //-----------------------------------------------------------------------------
   // Main interface
@@ -65,7 +65,7 @@ class DebayerModule {
 
   std::string encoding_;
 
-  cv::Mat debayered_image_;
+  cv::Mat image_;
 
   // Types
   std::vector<std::string> BAYER_TYPES = {"bayer_bggr8",

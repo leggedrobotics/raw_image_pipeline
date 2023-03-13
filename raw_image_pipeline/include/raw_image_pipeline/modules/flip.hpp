@@ -18,6 +18,11 @@ class FlipModule {
   bool enabled() const;
 
   //-----------------------------------------------------------------------------
+  // Getters
+  //-----------------------------------------------------------------------------
+  cv::Mat getImage() const;
+
+  //-----------------------------------------------------------------------------
   // Main interface
   //-----------------------------------------------------------------------------
   template <typename T>
@@ -26,6 +31,7 @@ class FlipModule {
       return false;
     }
     flip(image);
+    saveFlippedImage(image);
     return true;
   }
 
@@ -34,8 +40,11 @@ class FlipModule {
   //-----------------------------------------------------------------------------
  private:
   void flip(cv::Mat& image);
+  void saveFlippedImage(cv::Mat& image);
+
 #ifdef HAS_CUDA
   void flip(cv::cuda::GpuMat& image);
+  void saveFlippedImage(cv::cuda::GpuMat& image);
 #endif
 
   //-----------------------------------------------------------------------------
@@ -43,6 +52,7 @@ class FlipModule {
   //-----------------------------------------------------------------------------
   bool enabled_;
   bool use_gpu_;
+  cv::Mat image_;
 };
 
 }  // namespace raw_image_pipeline

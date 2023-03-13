@@ -208,7 +208,7 @@ void RawImagePipeline::resetWhiteBalanceTemporalConsistency() {
 }
 
 cv::Mat RawImagePipeline::getDistDebayeredImage() const {
-  return debayer_->getDebayeredImage();
+  return flipper_->getImage();
 }
 
 cv::Mat RawImagePipeline::getDistColorImage() const {

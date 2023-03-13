@@ -13,12 +13,23 @@ bool FlipModule::enabled() const {
 }
 
 //-----------------------------------------------------------------------------
+// Getters
+//-----------------------------------------------------------------------------
+cv::Mat FlipModule::getImage() const {
+  return image_.clone();
+}
+
+//-----------------------------------------------------------------------------
 // Wrapper methods (CPU)
 //-----------------------------------------------------------------------------
 void FlipModule::flip(cv::Mat& image) {
   cv::Mat out;
   cv::flip(image, out, -1);  // negative numbers flip x and y
   image = out;
+}
+
+void FlipModule::saveFlippedImage(cv::Mat& image) {
+  image.copyTo(image_);
 }
 
 //-----------------------------------------------------------------------------
@@ -29,6 +40,10 @@ void FlipModule::flip(cv::cuda::GpuMat& image) {
   cv::cuda::GpuMat out;
   cv::cuda::flip(image, out, -1);  // negative numbers flip x and y
   image = out;
+}
+
+void FlipModule::saveFlippedImage(cv::cuda::GpuMat& image) {
+  image.download(image_);
 }
 #endif
 

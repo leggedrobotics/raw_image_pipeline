@@ -22,8 +22,8 @@ void DebayerModule::setEncoding(const std::string& encoding) {
 //-----------------------------------------------------------------------------
 // Getters
 //-----------------------------------------------------------------------------
-cv::Mat DebayerModule::getDebayeredImage() const {
-  return debayered_image_.clone();
+cv::Mat DebayerModule::getImage() const {
+  return image_.clone();
 }
 
 //-----------------------------------------------------------------------------
@@ -64,7 +64,7 @@ void DebayerModule::debayer(cv::Mat& image, std::string& encoding) {
 }
 
 void DebayerModule::saveDebayeredImage(cv::Mat& image) {
-  image.copyTo(debayered_image_);
+  image.copyTo(image_);
 }
 
 //-----------------------------------------------------------------------------
@@ -97,7 +97,7 @@ void DebayerModule::debayer(cv::cuda::GpuMat& image, std::string& encoding) {
 }
 
 void DebayerModule::saveDebayeredImage(cv::cuda::GpuMat& image) {
-  image.download(debayered_image_);
+  image.download(image_);
 }
 
 #endif
