@@ -13,7 +13,6 @@ RawImagePipelineRos::RawImagePipelineRos(const ros::NodeHandle& nh, const ros::N
       image_transport_(nh),
       skipped_images_for_slow_topic_(0),
       skipped_images_for_slow_topic_rect_(0) {
-        
   // Setup
   google::InstallFailureSignalHandler();
 
@@ -35,7 +34,8 @@ bool RawImagePipelineRos::run() {
 void RawImagePipelineRos::loadParams() {
   // Topic options
   readRequiredParameter("input_topic", input_topic_);
-  readRequiredParameter("output_topic", output_topic_);
+  readRequiredParameter("input_type", input_type_);
+  readRequiredParameter("output_preffix", output_preffix_);
 
   // Get transport hint
   transport_ = getTransportHintFromTopic(input_topic_);
@@ -88,8 +88,12 @@ void RawImagePipelineRos::loadParams() {
 
     if (color_calibration_file.empty()) {
       std::vector<double> color_calibration_matrix =
-          readParameter("color_calibration/calibration_matrix/data", std::vector<double>({0.0, 0.0, 0.0, 0.0}));
+          readParameter("color_calibration/calibration_matrix/data", std::vector<double>({1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}));
       raw_image_pipeline_->setColorCalibrationMatrix(color_calibration_matrix);
+
+      std::vector<double> color_calibration_bias =
+          readParameter("color_calibration/calibration_bias/data", std::vector<double>({0.0, 0.0, 0.0}));
+      raw_image_pipeline_->setColorCalibrationBias(color_calibration_bias);
     }
   }
 
@@ -177,20 +181,25 @@ void RawImagePipelineRos::setupRos() {
   image_transport::TransportHints transport_hint(transport_);
 
   // Subscribe image
-  sub_raw_image_ = image_transport_.subscribe(input_topic_,                            // topic
-                                              ros_queue_size,                          // queue size
+  sub_raw_image_ = image_transport_.subscribe(input_topic_,                               // topic
+                                              ros_queue_size,                             // queue size
                                               &RawImagePipelineRos::imageCallback, this,  // callback
-                                              transport_hint                           // hints
+                                              transport_hint                              // hints
   );
   // Set up the processed image publisher.
   if (raw_image_pipeline_->isUndistortionEnabled()) {
-    pub_image_rect_ = image_transport_.advertiseCamera(output_topic_ + "/image_rect", ros_queue_size);
-    pub_image_rect_mask_ = image_transport_.advertise(output_topic_ + "/image_mask", ros_queue_size);
-    pub_image_rect_slow_ = image_transport_.advertise(output_topic_ + "/image_rect/slow", ros_queue_size);
+    pub_image_rect_ = image_transport_.advertiseCamera(output_preffix_ + "/" + input_type_ + "_rect/image", ros_queue_size);
+    // pub_image_rect_mask_ = image_transport_.advertise(output_preffix_ + "/image_mask", ros_queue_size);
+    pub_image_rect_slow_ = image_transport_.advertise(output_preffix_ + "/" + input_type_ + "_rect/image/slow", ros_queue_size);
   }
 
-  pub_image_ = image_transport_.advertiseCamera(output_topic_, ros_queue_size);
-  pub_image_slow_ = image_transport_.advertise(output_topic_ + "/slow", ros_queue_size);
+  if (input_type_ == "color") {
+    pub_image_debayered_ = image_transport_.advertiseCamera(output_preffix_ + "/debayered/image", ros_queue_size);
+    pub_image_debayered_slow_ = image_transport_.advertise(output_preffix_ + "/debayered/slow", ros_queue_size);
+
+    pub_image_color_ = image_transport_.advertiseCamera(output_preffix_ + "/color/image", ros_queue_size);
+    pub_image_color_slow_ = image_transport_.advertise(output_preffix_ + "/color/slow", ros_queue_size);
+  }
 
   // Setup service calls
   reset_wb_temporal_consistency_server_ =
@@ -222,30 +231,46 @@ void RawImagePipelineRos::imageCallback(const sensor_msgs::ImageConstPtr& image_
     // Publish undistorted
     publishColorImage(cv_ptr_processed,                                                                     // Processed
                       image_msg,                                                                            // Original image
-                      raw_image_pipeline_->getRectMask(),                                                           // Mask
-                      raw_image_pipeline_->getRectImageHeight(), raw_image_pipeline_->getRectImageWidth(),                  // Dimensions
-                      raw_image_pipeline_->getRectDistortionModel(), raw_image_pipeline_->getRectDistortionCoefficients(),  // Distortion stuff
+                      raw_image_pipeline_->getRectMask(),                                                   // Mask
+                      raw_image_pipeline_->getRectImageHeight(), raw_image_pipeline_->getRectImageWidth(),  // Dimensions
+                      raw_image_pipeline_->getRectDistortionModel(),
+                      raw_image_pipeline_->getRectDistortionCoefficients(),  // Distortion stuff
                       raw_image_pipeline_->getRectCameraMatrix(), raw_image_pipeline_->getRectRectificationMatrix(),
                       raw_image_pipeline_->getRectProjectionMatrix(),  // Pinhole stuff
-                      pub_image_rect_, pub_image_rect_slow_,   // Publishers
-                      skipped_images_for_slow_topic_rect_      // Counter to keep track of the number of skipped images
+                      pub_image_rect_, pub_image_rect_slow_,           // Publishers
+                      skipped_images_for_slow_topic_rect_              // Counter to keep track of the number of skipped images
     );
-
-    // Replace image by distorted
-    cv_ptr_processed->image = raw_image_pipeline_->getDistImage();
   }
 
-  // Publish distorted image
-  publishColorImage(cv_ptr_processed,                                                                     // Processed
-                    image_msg,                                                                            // Original image
-                    cv::Mat(),                                                                            // Mask
-                    raw_image_pipeline_->getDistImageHeight(), raw_image_pipeline_->getDistImageWidth(),                  // Dimensions
-                    raw_image_pipeline_->getDistDistortionModel(), raw_image_pipeline_->getDistDistortionCoefficients(),  // Distortion stuff
-                    raw_image_pipeline_->getDistCameraMatrix(), raw_image_pipeline_->getDistRectificationMatrix(),
-                    raw_image_pipeline_->getDistProjectionMatrix(),  // Pinhole stuff
-                    pub_image_, pub_image_slow_,             // Publishers
-                    skipped_images_for_slow_topic_           // Counter to keep track of the skipped images
-  );
+  if (input_type_ == "color") {
+    // Publish debayered image
+    cv_ptr_processed->image = raw_image_pipeline_->getDistDebayeredImage();
+    publishColorImage(cv_ptr_processed,                                                                     // Processed
+                      image_msg,                                                                            // Original image
+                      cv::Mat(),                                                                            // Mask
+                      raw_image_pipeline_->getDistImageHeight(), raw_image_pipeline_->getDistImageWidth(),  // Dimensions
+                      raw_image_pipeline_->getDistDistortionModel(),
+                      raw_image_pipeline_->getDistDistortionCoefficients(),  // Distortion stuff
+                      raw_image_pipeline_->getDistCameraMatrix(), raw_image_pipeline_->getDistRectificationMatrix(),
+                      raw_image_pipeline_->getDistProjectionMatrix(),   // Pinhole stuff
+                      pub_image_debayered_, pub_image_debayered_slow_,  // Publishers
+                      skipped_images_for_slow_topic_                    // Counter to keep track of the skipped images
+    );
+
+    // Publish color image
+    cv_ptr_processed->image = raw_image_pipeline_->getDistColorImage();
+    publishColorImage(cv_ptr_processed,                                                                     // Processed
+                      image_msg,                                                                            // Original image
+                      cv::Mat(),                                                                            // Mask
+                      raw_image_pipeline_->getDistImageHeight(), raw_image_pipeline_->getDistImageWidth(),  // Dimensions
+                      raw_image_pipeline_->getDistDistortionModel(),
+                      raw_image_pipeline_->getDistDistortionCoefficients(),  // Distortion stuff
+                      raw_image_pipeline_->getDistCameraMatrix(), raw_image_pipeline_->getDistRectificationMatrix(),
+                      raw_image_pipeline_->getDistProjectionMatrix(),   // Pinhole stuff
+                      pub_image_color_, pub_image_color_slow_,  // Publishers
+                      skipped_images_for_slow_topic_                    // Counter to keep track of the skipped images
+    );
+  }
 }
 
 bool RawImagePipelineRos::resetWhiteBalanceHandler(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res) {
@@ -256,14 +281,15 @@ bool RawImagePipelineRos::resetWhiteBalanceHandler(std_srvs::Trigger::Request& r
 }
 
 void RawImagePipelineRos::publishColorImage(const cv_bridge::CvImagePtr& cv_ptr_processed,                                //
-                                         const sensor_msgs::ImageConstPtr& orig_image,                                 //
-                                         const cv::Mat& mask,                                                          // Mask
-                                         int image_height, int image_width,                                            // Dimensions
-                                         const std::string& distortion_model, const cv::Mat& distortion_coefficients,  //
-                                         const cv::Mat& camera_matrix, const cv::Mat& rectification_matrix,
-                                         const cv::Mat& projection_matrix,                                                                //
-                                         image_transport::CameraPublisher& camera_publisher, image_transport::Publisher& slow_publisher,  //
-                                         int& skipped_images                                                                              //
+                                            const sensor_msgs::ImageConstPtr& orig_image,                                 //
+                                            const cv::Mat& mask,                                                          // Mask
+                                            int image_height, int image_width,                                            // Dimensions
+                                            const std::string& distortion_model, const cv::Mat& distortion_coefficients,  //
+                                            const cv::Mat& camera_matrix, const cv::Mat& rectification_matrix,
+                                            const cv::Mat& projection_matrix,  //
+                                            image_transport::CameraPublisher& camera_publisher,
+                                            image_transport::Publisher& slow_publisher,  //
+                                            int& skipped_images                          //
 ) {
   // Note: Image is BGR
   // Convert image to output encoding

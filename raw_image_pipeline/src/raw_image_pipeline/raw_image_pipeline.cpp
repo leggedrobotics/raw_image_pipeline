@@ -207,7 +207,11 @@ void RawImagePipeline::resetWhiteBalanceTemporalConsistency() {
   white_balancer_->resetTemporalConsistency();
 }
 
-cv::Mat RawImagePipeline::getDistImage() const {
+cv::Mat RawImagePipeline::getDistDebayeredImage() const {
+  return debayer_->getDebayeredImage();
+}
+
+cv::Mat RawImagePipeline::getDistColorImage() const {
   return undistorter_->getDistImage();
 }
 
@@ -271,8 +275,16 @@ void RawImagePipeline::setColorCalibrationMatrix(const std::vector<double>& colo
   color_calibrator_->setCalibrationMatrix(color_calibration_matrix);
 }
 
+void RawImagePipeline::setColorCalibrationBias(const std::vector<double>& color_calibration_bias) {
+  color_calibrator_->setCalibrationBias(color_calibration_bias);
+}
+
 cv::Mat RawImagePipeline::getColorCalibrationMatrix() const {
   return color_calibrator_->getCalibrationMatrix();
+}
+
+cv::Mat RawImagePipeline::getColorCalibrationBias() const {
+  return color_calibrator_->getCalibrationBias();
 }
 
 //-----------------------------------------------------------------------------

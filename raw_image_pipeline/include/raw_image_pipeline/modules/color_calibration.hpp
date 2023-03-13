@@ -25,11 +25,13 @@ class ColorCalibrationModule {
   // Setters
   //-----------------------------------------------------------------------------
   void setCalibrationMatrix(const std::vector<double>& color_calibration_matrix);
+  void setCalibrationBias(const std::vector<double>& color_calibration_bias);
 
   //-----------------------------------------------------------------------------
   // Getters
   //-----------------------------------------------------------------------------
   cv::Mat getCalibrationMatrix() const;
+  cv::Mat getCalibrationBias() const;
 
   //-----------------------------------------------------------------------------
   // Main interface
@@ -73,6 +75,7 @@ class ColorCalibrationModule {
   // Calibration & undistortion
   bool calibration_available_;
   cv::Matx33f color_calibration_matrix_;
+  cv::Scalar color_calibration_bias_;
 
 #ifdef HAS_CUDA
   Npp32f gpu_color_calibration_matrix_[3][4] = {{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}};

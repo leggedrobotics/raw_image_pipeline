@@ -83,9 +83,13 @@ class RawImagePipelineRos {
   image_transport::ImageTransport image_transport_;
   image_transport::Subscriber sub_raw_image_;
 
-  // Publisher
-  image_transport::CameraPublisher pub_image_;
-  image_transport::Publisher pub_image_slow_;
+  // Debayered publisher
+  image_transport::CameraPublisher pub_image_debayered_;
+  image_transport::Publisher pub_image_debayered_slow_;
+
+  // Debayered publisher
+  image_transport::CameraPublisher pub_image_color_;
+  image_transport::Publisher pub_image_color_slow_;
 
   // Rectified image publisher
   image_transport::CameraPublisher pub_image_rect_;
@@ -97,7 +101,8 @@ class RawImagePipelineRos {
 
   // ROS Params
   std::string input_topic_;
-  std::string output_topic_;
+  std::string input_type_;
+  std::string output_preffix_;
   std::string transport_;
 
   std::string output_encoding_;

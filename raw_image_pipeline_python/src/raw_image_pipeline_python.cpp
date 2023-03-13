@@ -37,6 +37,7 @@ PYBIND11_MODULE(_py_raw_image_pipeline, m) {
       .def("set_color_enhancer_value_gain", &RawImagePipeline::setColorEnhancerValueGain)
       .def("set_color_calibration", &RawImagePipeline::setColorCalibration)
       .def("set_color_calibration_matrix", &RawImagePipeline::setColorCalibrationMatrix)
+      .def("set_color_calibration_bias", &RawImagePipeline::setColorCalibrationBias)
       .def("set_undistortion", &RawImagePipeline::setUndistortion)
       .def("set_undistortion_image_size", &RawImagePipeline::setUndistortionImageSize)
       .def("set_undistortion_new_image_size", &RawImagePipeline::setUndistortionNewImageSize)

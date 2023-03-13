@@ -20,6 +20,13 @@ void DebayerModule::setEncoding(const std::string& encoding) {
 }
 
 //-----------------------------------------------------------------------------
+// Getters
+//-----------------------------------------------------------------------------
+cv::Mat DebayerModule::getDebayeredImage() const {
+  return debayered_image_.clone();
+}
+
+//-----------------------------------------------------------------------------
 // Helper methods
 //-----------------------------------------------------------------------------
 bool DebayerModule::isBayerEncoding(const std::string& encoding) const {
@@ -56,6 +63,10 @@ void DebayerModule::debayer(cv::Mat& image, std::string& encoding) {
   cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
 }
 
+void DebayerModule::saveDebayeredImage(cv::Mat& image) {
+  image.copyTo(debayered_image_);
+}
+
 //-----------------------------------------------------------------------------
 // Wrapper methods (GPU)
 //-----------------------------------------------------------------------------
@@ -84,5 +95,10 @@ void DebayerModule::debayer(cv::cuda::GpuMat& image, std::string& encoding) {
   // Update encoding
   encoding = "bgr8";
 }
+
+void DebayerModule::saveDebayeredImage(cv::cuda::GpuMat& image) {
+  image.download(debayered_image_);
+}
+
 #endif
 }  // namespace raw_image_pipeline

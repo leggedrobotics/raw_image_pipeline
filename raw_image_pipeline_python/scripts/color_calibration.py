@@ -58,20 +58,22 @@ def show_calibration_result(ref_bgr: np.array, input_list: list, corr_list: np.a
     for i in range(N):
         input_rgb = cv2.cvtColor(input_list[i], cv2.COLOR_BGR2RGB)
         corr_rgb = cv2.cvtColor(corr_list[i], cv2.COLOR_BGR2RGB)
-        axs[i][0].imshow(input_rgb)
-        axs[i][1].imshow(corr_rgb)
-        axs[i][2].imshow(ref_rgb)
+        try:
+            axs[i][0].imshow(input_rgb)
+            axs[i][1].imshow(corr_rgb)
+            axs[i][2].imshow(ref_rgb)
 
-        for ax in axs[i]:
-            ax.set_xticks([])
-            ax.set_yticks([])
+            for ax in axs[i]:
+                ax.set_xticks([])
+                ax.set_yticks([])
+        except Exception:
+            axs[0].imshow(input_rgb)
+            axs[1].imshow(corr_rgb)
+            axs[2].imshow(ref_rgb)
+    
     plt.axis("off")
     plt.tight_layout()
     plt.savefig(join(save_path, "calibrated_images.png"))
-
-
-def save_calibration_matrix(filename: str, C: np.array) -> None:
-    pass
 
 
 def apply_color_correction(color_correction: np.matrix, img: np.array) -> np.array:
@@ -283,8 +285,8 @@ def main(*arg, **args):
     show_calibration_result(cropped_ref, cropped_in_list, cropped_corr_list, save_path=args.output_path)
 
     # Save as YAML file
-    calib_str = f"""color_calibration_matrix:\n  rows: 3\n  cols: 3\n  data: {str([x for x in sol["matrix"].flatten()])}"""
-    calib_str += f"""\ncolor_calibration_bias:\n  rows: 3\n  cols: 1\n  data: {str([x for x in sol["bias"].flatten()])}"""
+    calib_str = f"""matrix:\n  rows: 3\n  cols: 3\n  data: {str([x for x in sol["matrix"].flatten()])}"""
+    calib_str += f"""\nbias:\n  rows: 3\n  cols: 1\n  data: {str([x for x in sol["bias"].flatten()])}"""
     # Print calibration putput
     print(calib_str)
     

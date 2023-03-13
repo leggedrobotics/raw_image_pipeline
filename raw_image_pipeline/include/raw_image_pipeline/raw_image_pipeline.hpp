@@ -71,7 +71,9 @@ class RawImagePipeline {
   void setWhiteBalanceTemporalConsistency(bool enabled);
   void setColorCalibration(bool enabled);
   void setColorCalibrationMatrix(const std::vector<double>& color_calibration_matrix);
+  void setColorCalibrationBias(const std::vector<double>& color_calibration_bias);
   cv::Mat getColorCalibrationMatrix() const;
+  cv::Mat getColorCalibrationBias() const;
 
   void setGammaCorrection(bool enabled);
   void setGammaCorrectionMethod(const std::string& method);
@@ -124,7 +126,8 @@ class RawImagePipeline {
   cv::Mat getRectRectificationMatrix() const;
   cv::Mat getRectProjectionMatrix() const;
 
-  cv::Mat getDistImage() const;
+  cv::Mat getDistDebayeredImage() const;
+  cv::Mat getDistColorImage() const;
   cv::Mat getRectMask() const;
 
  private:

@@ -2,7 +2,9 @@
   <!-- General options-->
   <arg name="camera_name"                          default="cam0"/>
   <arg name="input_topic"                          default="alphasense_driver_ros/cam0"/>
-  <arg name="output_topic"                         default="alphasense_driver_ros/cam0/debayered"/>
+  <arg name="input_type"                           default="color"/>
+
+  <arg name="output_preffix"                       default="alphasense_driver_ros/cam0"/>
   <arg name="output_frame"                         default="cam0_sensor_frame_helper"/>
   
   <arg name="launch_prefix"                        default=""/>
@@ -10,7 +12,9 @@
   
   <arg name="output_encoding"                      default="BGR"/>   <!-- Format of the published image BGR and RGB supported-->
   <arg name="skip_number_of_images_for_slow_topic" default="5"/>     <!-- To publish images at a slower rate -->
-  <arg name="use_gpu"                              default="true"/>     <!-- To publish images at a slower rate -->
+  <arg name="use_gpu"                              default="false"/>     <!-- To publish images at a slower rate -->
+
+  <arg name="disable_compression_plugins"          default="true"/>     <!-- To avoid publication of theora or compressedDepth topics -->
 
   <!-- Modules -->
   <arg name="debayer/enabled"                      default="true"/>
@@ -47,11 +51,40 @@
   <arg name="undistortion/fov_scale"               default="1.2"/> <!-- scale > 1.0 increases the FoV -->
   <arg name="undistortion/calibration_file"       default="$(find raw_image_pipeline)/config/alphasense_calib_example.yaml"/>
   
-  
+  <!-- Disable Image Transport plugins -->
+  <group if="$(arg disable_compression_plugins)" ns="$(arg output_preffix)">
+    <rosparam param="debayered/image/disable_pub_plugins">
+      - 'image_transport/compressedDepth'
+      - 'image_transport/theora'
+    </rosparam>
+    <rosparam param="debayered/slow/disable_pub_plugins">
+      - 'image_transport/compressedDepth'
+      - 'image_transport/theora'
+    </rosparam>
+    <rosparam param="$(arg input_type)/image/disable_pub_plugins">
+      - 'image_transport/compressedDepth'
+      - 'image_transport/theora'
+    </rosparam>
+    <rosparam param="$(arg input_type)/slow/disable_pub_plugins">
+      - 'image_transport/compressedDepth'
+      - 'image_transport/theora'
+    </rosparam>
+    <rosparam param="$(arg input_type)_rect/image/disable_pub_plugins">
+      - 'image_transport/compressedDepth'
+      - 'image_transport/theora'
+    </rosparam>
+    <rosparam param="$(arg input_type)_rect/slow/disable_pub_plugins">
+      - 'image_transport/compressedDepth'
+      - 'image_transport/theora'
+    </rosparam>
+  </group>
+
   <!-- Nodes -->
   <node name="raw_image_pipeline_ros_node_$(arg camera_name)" type="raw_image_pipeline_ros_node" pkg="raw_image_pipeline_ros" output="screen" launch-prefix="$(arg launch_prefix)">
     <param name="input_topic"                          value="$(arg input_topic)"/>
-    <param name="output_topic"                         value="$(arg output_topic)"/>
+    <param name="input_type"                           value="$(arg input_type)"/>
+
+    <param name="output_preffix"                       value="$(arg output_preffix)"/>
     <param name="output_encoding"                      value="$(arg output_encoding)"/>
     <param name="output_frame"                         value="$(arg output_frame)"/>
     <param name="skip_number_of_images_for_slow_topic" value="$(arg skip_number_of_images_for_slow_topic)"/>

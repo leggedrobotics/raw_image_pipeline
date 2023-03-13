@@ -17,6 +17,17 @@ struct convert<cv::Matx14d> {
 };
 
 template <>
+struct convert<cv::Matx31d> {
+  static bool decode(const YAML::Node& node, cv::Matx31d& rhs) {
+    if (!node.IsSequence() || node.size() != 3) {
+      return false;
+    }
+    rhs = cv::Matx31d{node[0].as<double>(), node[1].as<double>(), node[2].as<double>()};
+    return true;
+  }
+};
+
+template <>
 struct convert<cv::Matx33d> {
   static bool decode(const YAML::Node& node, cv::Matx33d& rhs) {
     if (!node.IsSequence() || node.size() != 9) {

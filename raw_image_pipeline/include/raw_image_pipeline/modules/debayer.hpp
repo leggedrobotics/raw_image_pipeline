@@ -23,6 +23,11 @@ class DebayerModule {
   void setEncoding(const std::string& encoding);
 
   //-----------------------------------------------------------------------------
+  // Getters
+  //-----------------------------------------------------------------------------
+  cv::Mat getDebayeredImage() const;
+
+  //-----------------------------------------------------------------------------
   // Main interface
   //-----------------------------------------------------------------------------
   template <typename T>
@@ -34,6 +39,7 @@ class DebayerModule {
     std::string input_encoding = encoding_ == "auto" ? encoding : encoding_;
     // Run debayer
     debayer(image, encoding);
+    saveDebayeredImage(image);
     return true;
   }
 
@@ -44,8 +50,11 @@ class DebayerModule {
   bool isBayerEncoding(const std::string& encoding) const;
 
   void debayer(cv::Mat& image, std::string& encoding);
+  void saveDebayeredImage(cv::Mat& image);
+
 #ifdef HAS_CUDA
   void debayer(cv::cuda::GpuMat& image, std::string& encoding);
+  void saveDebayeredImage(cv::cuda::GpuMat& image);
 #endif
 
   //-----------------------------------------------------------------------------
@@ -56,6 +65,9 @@ class DebayerModule {
 
   std::string encoding_;
 
+  cv::Mat debayered_image_;
+
+  // Types
   std::vector<std::string> BAYER_TYPES = {"bayer_bggr8",
                                           "bayer_gbrg8",
                                           "bayer_grbg8",
