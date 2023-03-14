@@ -49,6 +49,10 @@ void RawImagePipelineRos::loadParams() {
   bool use_gpu = readParameter("use_gpu", true);
   raw_image_pipeline_ = std::make_unique<RawImagePipeline>(use_gpu);
 
+  // Debug param
+  bool debug = readParameter("debug", false);
+  raw_image_pipeline_->setDebug(debug);
+
   // Debayer
   bool run_debayer = readParameter("debayer/enabled", true);
   raw_image_pipeline_->setDebayer(run_debayer);

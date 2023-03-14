@@ -18,7 +18,7 @@ def main():
     param_file = rospack.get_path("raw_image_pipeline") + "/config/pipeline_params_example.yaml"
 
     # Create image Proc
-    proc = RawImagePipeline(True, param_file, calib_file, color_calib_file)
+    proc = RawImagePipeline(False, param_file, calib_file, color_calib_file)
 
     # Uncomment below to show calibration data
     print("Original parameters:")

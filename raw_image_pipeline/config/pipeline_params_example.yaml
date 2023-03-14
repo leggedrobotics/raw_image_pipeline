@@ -11,8 +11,8 @@ white_balance:
   method: "ccc"
   clipping_percentile: 20
   saturation_bright_thr: 0.8
-  saturation_dark_thr: 0.1
-  temporal_consistency: true
+  saturation_dark_thr: 0.2
+  temporal_consistency: false
 
 color_calibration:
   enabled: false

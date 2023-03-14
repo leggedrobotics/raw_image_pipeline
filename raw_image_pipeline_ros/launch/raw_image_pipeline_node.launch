@@ -8,11 +8,11 @@
   <arg name="output_frame"                         default="cam0_sensor_frame_helper"/>
   
   <arg name="launch_prefix"                        default=""/>
-  <arg name="dump_images"                          default="false"/> <!-- writes the output of each module to /tmp -->
   
   <arg name="output_encoding"                      default="BGR"/>   <!-- Format of the published image BGR and RGB supported-->
   <arg name="skip_number_of_images_for_slow_topic" default="5"/>     <!-- To publish images at a slower rate -->
   <arg name="use_gpu"                              default="false"/>     <!-- To publish images at a slower rate -->
+  <arg name="debug"                                default="false"/> <!-- to export debug data to /tmp -->
 
   <arg name="disable_compression_plugins"          default="true"/>     <!-- To avoid publication of theora or compressedDepth topics -->
 
@@ -89,6 +89,7 @@
     <param name="output_frame"                         value="$(arg output_frame)"/>
     <param name="skip_number_of_images_for_slow_topic" value="$(arg skip_number_of_images_for_slow_topic)"/>
     <param name="use_gpu"                              value="$(arg use_gpu)"/>
+    <param name="debug"                                value="$(arg debug)"/>
     
     <param name="debayer/enabled"                      value="$(arg debayer/enabled)"/>
     <param name="debayer/encoding"                     value="$(arg debayer_encoding)"/>

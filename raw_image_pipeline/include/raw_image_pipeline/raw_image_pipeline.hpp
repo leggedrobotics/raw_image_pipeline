@@ -15,8 +15,8 @@
 #include <yaml-cpp/yaml.h>
 #include <Eigen/Core>
 #include <Eigen/Dense>
-#include <raw_image_pipeline/utils.hpp>
 #include <memory>
+#include <raw_image_pipeline/utils.hpp>
 
 // Modules
 #include <raw_image_pipeline/modules/color_calibration.hpp>
@@ -35,7 +35,7 @@ class RawImagePipeline {
   // Constructor & destructor
   RawImagePipeline(bool use_gpu);
   RawImagePipeline(bool use_gpu, const std::string& params_path, const std::string& calibration_path,
-                const std::string& color_calibration_path);
+                   const std::string& color_calibration_path);
   ~RawImagePipeline();
 
   //-----------------------------------------------------------------------------
@@ -55,6 +55,7 @@ class RawImagePipeline {
   // Other interfaces
   void resetWhiteBalanceTemporalConsistency();
   void setGpu(bool use_gpu);
+  void setDebug(bool debug);
 
   //-----------------------------------------------------------------------------
   // Setters
@@ -138,14 +139,46 @@ class RawImagePipeline {
   void pipeline(T& image, std::string& encoding) {
     // Run pipeline
     debayer_->apply(image, encoding);
+    saveDebugImage(image, "/tmp/00_debayer.png");
+
     flipper_->apply(image);
+    saveDebugImage(image, "/tmp/01_flip.png");
+
     white_balancer_->apply(image);
+    saveDebugImage(image, "/tmp/02_white_balancing.png");
+
     color_calibrator_->apply(image);
+    saveDebugImage(image, "/tmp/03_color_calibration.png");
+
     gamma_corrector_->apply(image);
+    saveDebugImage(image, "/tmp/04_gamma_correction.png");
+
     vignetting_corrector_->apply(image);
+    saveDebugImage(image, "/tmp/05_vignetting_correction.png");
+
     color_enhancer_->apply(image);
+    saveDebugImage(image, "/tmp/06_color_enhancer.png");
+
     undistorter_->apply(image);
+    saveDebugImage(image, "/tmp/07_undistortion.png");
   }
+
+  void saveDebugImage(const cv::Mat& image, const std::string& filename) const {
+    if (debug_) {
+      cv::Mat tmp;
+      image.copyTo(tmp);
+      cv::normalize(tmp, tmp, 0, 255.0, cv::NORM_MINMAX);
+      cv::imwrite(filename, tmp);
+    }
+  }
+
+#ifdef HAS_CUDA
+  void saveDebugImage(const cv::cuda::GpuMat& image, const std::string& filename) const {
+    cv::Mat tmp;
+    image.download(tmp);
+    saveDebugImage(tmp, filename);
+  }
+#endif
 
   //-----------------------------------------------------------------------------
   // Modules
@@ -164,6 +197,7 @@ class RawImagePipeline {
   //-----------------------------------------------------------------------------
   // Pipeline options
   bool use_gpu_;
+  bool debug_;
 };
 
 }  // namespace raw_image_pipeline

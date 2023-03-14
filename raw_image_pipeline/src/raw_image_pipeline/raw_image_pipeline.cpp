@@ -8,7 +8,7 @@
 
 namespace raw_image_pipeline {
 
-RawImagePipeline::RawImagePipeline(bool use_gpu) : use_gpu_(use_gpu) {
+RawImagePipeline::RawImagePipeline(bool use_gpu) : use_gpu_(use_gpu), debug_(false) {
   // Load parameters
   loadParams(DEFAULT_PARAMS_PATH);
   undistorter_->loadCalibration(DEFAULT_CALIBRATION_PATH);
@@ -201,6 +201,10 @@ bool RawImagePipeline::apply(cv::Mat& image, std::string& encoding) {
 //-----------------------------------------------------------------------------
 void RawImagePipeline::setGpu(bool use_gpu) {
   use_gpu_ = use_gpu;
+}
+
+void RawImagePipeline::setDebug(bool debug) {
+  debug_ = debug;
 }
 
 void RawImagePipeline::resetWhiteBalanceTemporalConsistency() {

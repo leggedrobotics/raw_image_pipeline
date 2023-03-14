@@ -2,15 +2,20 @@
 
 Image processing utilities used for cameras that provide RAW data, such as the Alphasense Core unit.
 
-
 **Maintainers:** Matias Mattamala (matias@robots.ox.ac.uk)
 
 **Contributors:** Matias Mattamala, Timon Homberger, Marco Tranzatto, Samuel Zimmermann, Lorenz Wellhausen, Shehryar Khattak, Gabriel Waibel
 
+<img src="docs/raw_image_pipeline.png" alt="raw_image_pipeline overview" width="1000"/>
 
 
 ## License
 This source code is released under a [MIT License](LICENSE).
+
+`raw_image_pipeline_white_balance` relies on Shane Yuan's [AutoWhiteBalance package](https://github.com/yuanxy92/AutoWhiteBalance) licensed under [GNU](raw_image_pipeline_white_balance/LICENSE).
+
+`raw_image_pipeline_python` relies on Pascal Thomet's [cvnp](https://github.com/pthom/cvnp), licensed under [MIT](raw_image_pipeline_python/thirdparty/cvnp/LICENSE) as well.
+
 
 ## Build
 

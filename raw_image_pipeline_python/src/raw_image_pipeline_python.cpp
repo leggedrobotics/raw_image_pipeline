@@ -11,13 +11,14 @@ PYBIND11_MODULE(_py_raw_image_pipeline, m) {
       .def(py::init<bool>(),  //
            py::arg("use_gpu"))
       .def(py::init<bool, const std::string&, const std::string&, const std::string&>(),  //
-           py::arg("use_gpu") = true, py::arg("params_path") = "",
+           py::arg("use_gpu") = false, py::arg("params_path") = "",
            py::arg("calibration_path") = "",        //
            py::arg("color_calibration_path") = "")
       .def("apply", &RawImagePipeline::apply)
       .def("process", &RawImagePipeline::process)
       .def("load_params", &RawImagePipeline::loadParams)
       .def("set_gpu", &RawImagePipeline::setGpu)
+      .def("set_debug", &RawImagePipeline::setDebug)
       .def("set_debayer", &RawImagePipeline::setDebayer)
       .def("set_debayer_encoding", &RawImagePipeline::setDebayerEncoding)
       .def("set_flip", &RawImagePipeline::setFlip)
