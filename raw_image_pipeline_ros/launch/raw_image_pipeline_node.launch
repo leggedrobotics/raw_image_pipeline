@@ -4,7 +4,7 @@
   <arg name="input_topic"                          default="alphasense_driver_ros/cam0"/>
   <arg name="input_type"                           default="color"/>
 
-  <arg name="output_preffix"                       default="alphasense_driver_ros/cam0"/>
+  <arg name="output_prefix"                       default="alphasense_driver_ros/cam0"/>
   <arg name="output_frame"                         default="cam0_sensor_frame_helper"/>
   
   <arg name="launch_prefix"                        default=""/>
@@ -52,7 +52,7 @@
   <arg name="undistortion/calibration_file"       default="$(find raw_image_pipeline)/config/alphasense_calib_example.yaml"/>
   
   <!-- Disable Image Transport plugins -->
-  <group if="$(arg disable_compression_plugins)" ns="$(arg output_preffix)">
+  <group if="$(arg disable_compression_plugins)" ns="$(arg output_prefix)">
     <rosparam param="debayered/image/disable_pub_plugins">
       - 'image_transport/compressedDepth'
       - 'image_transport/theora'
@@ -84,7 +84,7 @@
     <param name="input_topic"                          value="$(arg input_topic)"/>
     <param name="input_type"                           value="$(arg input_type)"/>
 
-    <param name="output_preffix"                       value="$(arg output_preffix)"/>
+    <param name="output_prefix"                       value="$(arg output_prefix)"/>
     <param name="output_encoding"                      value="$(arg output_encoding)"/>
     <param name="output_frame"                         value="$(arg output_frame)"/>
     <param name="skip_number_of_images_for_slow_topic" value="$(arg skip_number_of_images_for_slow_topic)"/>

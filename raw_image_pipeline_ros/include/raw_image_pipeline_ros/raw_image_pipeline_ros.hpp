@@ -102,7 +102,7 @@ class RawImagePipelineRos {
   // ROS Params
   std::string input_topic_;
   std::string input_type_;
-  std::string output_preffix_;
+  std::string output_prefix_;
   std::string transport_;
 
   std::string output_encoding_;

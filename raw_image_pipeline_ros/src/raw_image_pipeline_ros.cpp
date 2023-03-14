@@ -35,7 +35,7 @@ void RawImagePipelineRos::loadParams() {
   // Topic options
   readRequiredParameter("input_topic", input_topic_);
   readRequiredParameter("input_type", input_type_);
-  readRequiredParameter("output_preffix", output_preffix_);
+  readRequiredParameter("output_prefix", output_prefix_);
 
   // Get transport hint
   transport_ = getTransportHintFromTopic(input_topic_);
@@ -192,17 +192,17 @@ void RawImagePipelineRos::setupRos() {
   );
   // Set up the processed image publisher.
   if (raw_image_pipeline_->isUndistortionEnabled()) {
-    pub_image_rect_ = image_transport_.advertiseCamera(output_preffix_ + "/" + input_type_ + "_rect/image", ros_queue_size);
-    // pub_image_rect_mask_ = image_transport_.advertise(output_preffix_ + "/image_mask", ros_queue_size);
-    pub_image_rect_slow_ = image_transport_.advertise(output_preffix_ + "/" + input_type_ + "_rect/image/slow", ros_queue_size);
+    pub_image_rect_ = image_transport_.advertiseCamera(output_prefix_ + "/" + input_type_ + "_rect/image", ros_queue_size);
+    // pub_image_rect_mask_ = image_transport_.advertise(output_prefix_ + "/image_mask", ros_queue_size);
+    pub_image_rect_slow_ = image_transport_.advertise(output_prefix_ + "/" + input_type_ + "_rect/image/slow", ros_queue_size);
   }
 
   if (input_type_ == "color") {
-    pub_image_debayered_ = image_transport_.advertiseCamera(output_preffix_ + "/debayered/image", ros_queue_size);
-    pub_image_debayered_slow_ = image_transport_.advertise(output_preffix_ + "/debayered/slow", ros_queue_size);
+    pub_image_debayered_ = image_transport_.advertiseCamera(output_prefix_ + "/debayered/image", ros_queue_size);
+    pub_image_debayered_slow_ = image_transport_.advertise(output_prefix_ + "/debayered/slow", ros_queue_size);
 
-    pub_image_color_ = image_transport_.advertiseCamera(output_preffix_ + "/color/image", ros_queue_size);
-    pub_image_color_slow_ = image_transport_.advertise(output_preffix_ + "/color/slow", ros_queue_size);
+    pub_image_color_ = image_transport_.advertiseCamera(output_prefix_ + "/color/image", ros_queue_size);
+    pub_image_color_slow_ = image_transport_.advertise(output_prefix_ + "/color/slow", ros_queue_size);
   }
 
   // Setup service calls
