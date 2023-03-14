@@ -155,7 +155,7 @@ sudo apt install libyaml-cpp-dev
 cd ~/git
 git clone git@github.com:catkin/catkin_simple.git
 git clone git@github.com:ethz-asl/glog_catkin.git
-git clone git@github.com:mmattamala/pybind11_catkin.git
+git clone git@github.com:leggedrobotics/pybind11_catkin.git
 cd ~/catkin_ws/src
 ln -s ../../git/catkin_simple .
 ln -s ../../git/glog_catkin .
