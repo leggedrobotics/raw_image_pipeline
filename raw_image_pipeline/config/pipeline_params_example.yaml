@@ -1,0 +1,39 @@
+# Pipeline options
+debayer:
+  enabled: true
+  encoding: "auto"
+
+flip:
+  enabled: false
+
+white_balance:
+  enabled: true
+  method: "ccc"
+  clipping_percentile: 20
+  saturation_bright_thr: 0.8
+  saturation_dark_thr: 0.2
+  temporal_consistency: false
+
+color_calibration:
+  enabled: false
+
+gamma_correction:
+  enabled: false
+  method: "custom"
+  k: 0.8
+
+vignetting_correction:
+  enabled: false
+  scale: 1.5
+  a2: 1e-3
+  a4: 1e-6
+
+color_enhancer:
+  hue_gain: 1.0
+  saturation_gain: 1.5
+  value_gain: 1.0
+
+undistortion:
+  enabled: true
+  balance: 0.0
+  fov_scale: 0.8 #1.2
