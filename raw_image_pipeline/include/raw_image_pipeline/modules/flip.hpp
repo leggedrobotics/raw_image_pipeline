@@ -28,6 +28,7 @@ class FlipModule {
   template <typename T>
   bool apply(T& image) {
     if (!enabled_) {
+      saveFlippedImage(image);
       return false;
     }
     flip(image);
