@@ -270,9 +270,9 @@ void RawImagePipelineRos::imageCallback(const sensor_msgs::ImageConstPtr& image_
                       raw_image_pipeline_->getDistDistortionModel(),
                       raw_image_pipeline_->getDistDistortionCoefficients(),  // Distortion stuff
                       raw_image_pipeline_->getDistCameraMatrix(), raw_image_pipeline_->getDistRectificationMatrix(),
-                      raw_image_pipeline_->getDistProjectionMatrix(),   // Pinhole stuff
-                      pub_image_color_, pub_image_color_slow_,  // Publishers
-                      skipped_images_for_slow_topic_                    // Counter to keep track of the skipped images
+                      raw_image_pipeline_->getDistProjectionMatrix(),  // Pinhole stuff
+                      pub_image_color_, pub_image_color_slow_,         // Publishers
+                      skipped_images_for_slow_topic_                   // Counter to keep track of the skipped images
     );
   }
 }

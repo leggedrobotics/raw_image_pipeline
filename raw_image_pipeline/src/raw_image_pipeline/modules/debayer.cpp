@@ -43,15 +43,19 @@ void DebayerModule::debayer(cv::Mat& image, std::string& encoding) {
   if (encoding == "bayer_bggr8") {
     cv::demosaicing(image, out, cv::COLOR_BayerBG2BGR);
     image = out;
+    cv::cvtColor(image, image, cv::COLOR_RGB2BGR);  // Fix because apparently the CPU demosaicing produces RGB
   } else if (encoding == "bayer_gbrg8") {
     cv::demosaicing(image, out, cv::COLOR_BayerGB2BGR);
     image = out;
+    cv::cvtColor(image, image, cv::COLOR_RGB2BGR);  // Fix because apparently the CPU demosaicing produces RGB
   } else if (encoding == "bayer_grbg8") {
     cv::demosaicing(image, out, cv::COLOR_BayerGR2BGR);
     image = out;
+    cv::cvtColor(image, image, cv::COLOR_RGB2BGR);  // Fix because apparently the CPU demosaicing produces RGB
   } else if (encoding == "bayer_rggb8") {
     cv::demosaicing(image, out, cv::COLOR_BayerRG2BGR);
     image = out;
+    cv::cvtColor(image, image, cv::COLOR_RGB2BGR);  // Fix because apparently the CPU demosaicing produces RGB
   }
   // We ignore non-bayer encodings
   else if (isBayerEncoding(encoding)) {
@@ -60,7 +64,6 @@ void DebayerModule::debayer(cv::Mat& image, std::string& encoding) {
 
   // Update encoding
   encoding = "bgr8";
-  cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
 }
 
 void DebayerModule::saveDebayeredImage(cv::Mat& image) {
