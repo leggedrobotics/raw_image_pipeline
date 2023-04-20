@@ -61,7 +61,7 @@ add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_gencfg)
 
 # Mark executables and/or libraries for installation
 install(
-  TARGETS ${PROJECT_NAME}
+  TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -72,6 +72,7 @@ install(
   DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.hpp"
+                 PATTERN "*.h"
 )
 
 # Mark other files for installation
