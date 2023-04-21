@@ -22,7 +22,7 @@ if(${OpenCV_CUDA_VERSION})
 endif()
 
 generate_dynamic_reconfigure_options(
-  cfg/raw_image_pipeline_white_balance.cfg
+  cfg/RawImagePipelineWhiteBalance.cfg
 )
 
 catkin_package(
