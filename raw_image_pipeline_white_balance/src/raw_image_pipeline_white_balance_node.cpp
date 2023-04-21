@@ -16,12 +16,12 @@ author: Matias Mattamala
 #include <ros/ros.h>
 
 #include <dynamic_reconfigure/server.h>
-#include <raw_image_pipeline_white_balance/ImageProcWhiteBalanceConfig.h>
+#include <raw_image_pipeline_white_balance/RawImagePipelineWhiteBalanceConfig.h>
 
 class WhiteBalanceRos {
  public:
-  dynamic_reconfigure::Server<raw_image_pipeline_white_balance::ImageProcWhiteBalanceConfig> server_;
-  dynamic_reconfigure::Server<raw_image_pipeline_white_balance::ImageProcWhiteBalanceConfig>::CallbackType f_;
+  dynamic_reconfigure::Server<raw_image_pipeline_white_balance::RawImagePipelineWhiteBalanceConfig> server_;
+  dynamic_reconfigure::Server<raw_image_pipeline_white_balance::RawImagePipelineWhiteBalanceConfig>::CallbackType f_;
   std::string model_file_;
   std::string image_file_;
   cv::Mat image_;
@@ -68,7 +68,7 @@ class WhiteBalanceRos {
     server_.setCallback(f_);
   }
 
-  void callback(raw_image_pipeline_white_balance::ImageProcWhiteBalanceConfig& config, uint32_t) {
+  void callback(raw_image_pipeline_white_balance::RawImagePipelineWhiteBalanceConfig& config, uint32_t) {
     wb_->setSaturationThreshold(config.bright_thr, config.dark_thr);
     // wb_->setDebugUVOffset(config.Lu_offset, config.Lv_offset, config.uv0);
     std::cout << "-- Updating parameters -- " << std::endl;

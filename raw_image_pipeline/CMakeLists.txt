@@ -97,9 +97,3 @@ install(
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.hpp"
 )
-
-# Mark other files for installation
-install(
-  DIRECTORY model
-  DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-)
