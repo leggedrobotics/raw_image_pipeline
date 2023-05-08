@@ -1,5 +1,7 @@
-// Author: Matias Mattamala
-// Author: Timon Homberger
+//
+// Copyright (c) 2021-2023, ETH Zurich, Robotic Systems Lab, Matias Mattamala, Timon Homberger. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
+//
 
 #pragma once
 

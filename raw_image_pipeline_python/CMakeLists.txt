@@ -1,3 +1,8 @@
+#
+# Copyright (c) 2021-2023, ETH Zurich, Robotic Systems Lab, Matias Mattamala. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for details.
+#
+
 cmake_minimum_required(VERSION 3.1)
 project(raw_image_pipeline_python)
 

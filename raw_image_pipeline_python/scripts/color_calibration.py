@@ -1,4 +1,10 @@
 #!/usr/bin/python3
+
+#
+# Copyright (c) 2021-2023, ETH Zurich, Robotic Systems Lab, Matias Mattamala. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for details.
+#
+
 # ArUco markers generated using https://chev.me/arucogen/
 # 4x4, markers 0, 1, 2, 3
 # marker size: 30 mm

@@ -1,3 +1,8 @@
+//
+// Copyright (c) 2021-2023, ETH Zurich, Robotic Systems Lab, Matias Mattamala. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
+//
+
 #include <raw_image_pipeline/modules/vignetting_correction.hpp>
 
 namespace raw_image_pipeline {
