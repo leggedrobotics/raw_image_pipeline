@@ -1,3 +1,8 @@
+#
+# Copyright (c) 2021-2023, ETH Zurich, Robotic Systems Lab, Matias Mattamala. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for details.
+#
+
 ## ! DO NOT MANUALLY INVOKE THIS setup.py, USE CATKIN INSTEAD
 
 from distutils.core import setup

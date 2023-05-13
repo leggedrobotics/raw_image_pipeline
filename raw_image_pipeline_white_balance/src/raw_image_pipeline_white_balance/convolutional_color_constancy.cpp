@@ -1,9 +1,12 @@
+//
+// Copyright (c) 2021-2023, ETH Zurich, Robotic Systems Lab, Matias Mattamala. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
+// 
+
 /**
 @brief raw_image_pipeline_white_balance.cpp
 Class for White Balance built upon "AutoWhiteBalance" code by Shane Yuan
 based on Barron, "Fast Fourier Color Constancy", CVPR, 2017
-
-Author: Matias Mattamala
 */
 
 #include <raw_image_pipeline_white_balance/convolutional_color_constancy.hpp>

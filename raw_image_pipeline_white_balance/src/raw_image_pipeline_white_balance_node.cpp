@@ -1,9 +1,11 @@
+//
+// Copyright (c) 2021-2023, ETH Zurich, Robotic Systems Lab, Matias Mattamala. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
+// 
+
 /**
 @brief raw_image_pipeline_white_balance_node.cpp
 simple test node to control UV using rqt_reconfigure
-
-author: Matias Mattamala
-
 */
 
 // ROS

@@ -1,5 +1,10 @@
 #!/usr/bin/python3
 
+#
+# Copyright (c) 2021-2023, ETH Zurich, Robotic Systems Lab, Matias Mattamala. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for details.
+#
+
 from py_raw_image_pipeline import RawImagePipeline
 import cv2
 import pathlib
