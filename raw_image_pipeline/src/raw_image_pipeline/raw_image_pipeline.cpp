@@ -67,7 +67,10 @@ void RawImagePipeline::loadParams(const std::string& file_path) {
       flipper_ = std::make_unique<FlipModule>(use_gpu_);
 
       bool enabled = utils::get(node["flip"], "enabled", false);
+      int angle = utils::get(node["flip"], "angle", 0);
+
       flipper_->enable(enabled);
+      flipper_->setAngle(angle);
     }
 
     // White balance params
@@ -248,6 +251,10 @@ void RawImagePipeline::setDebayerEncoding(const std::string& encoding) {
 //-----------------------------------------------------------------------------
 void RawImagePipeline::setFlip(bool enabled) {
   flipper_->enable(enabled);
+}
+
+void RawImagePipeline::setFlipAngle(int angle) {
+  flipper_->setAngle(angle);
 }
 
 //-----------------------------------------------------------------------------

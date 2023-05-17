@@ -66,6 +66,9 @@ void RawImagePipelineRos::loadParams() {
   bool needs_rotation = readParameter("flip/enabled", false);
   raw_image_pipeline_->setFlip(needs_rotation);
 
+  int flip_angle = readParameter("flip/angle", 0);
+  raw_image_pipeline_->setFlipAngle(flip_angle);
+
   // White balancing params
   bool run_white_balance = readParameter("white_balance/enabled", false);
   raw_image_pipeline_->setWhiteBalance(run_white_balance);
