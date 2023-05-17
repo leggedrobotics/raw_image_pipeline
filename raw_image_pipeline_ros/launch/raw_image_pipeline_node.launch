@@ -29,6 +29,8 @@
   <!-- Camera -->
   <!-- Debayer  -->
   <arg name="debayer_encoding"                     default="auto"/>  <!-- auto, bayer_bggr8, bayer_gbrg8, bayer_grbg8, bayer_rggb8-->
+   <!-- Flip  -->
+  <arg name="flip/angle"                           default="0"/>  <!-- 90 (clockwise), 180, 270 (counter-clockwise) -->
   <!-- White balance options -->
   <arg name="white_balance/method"                 default="ccc"/> <!-- simple, grey_world, learned, ccc, pca -->
   <arg name="white_balance/clipping_percentile"    default="10"/>  <!-- simple WB, values [0-100]-->
@@ -95,6 +97,7 @@
     <param name="debayer/encoding"                     value="$(arg debayer_encoding)"/>
 
     <param name="flip/enabled"                         value="$(arg flip/enabled)"/>
+    <param name="flip/angle"                           value="$(arg flip/angle)"/>
     
     <param name="white_balance/enabled"                value="$(arg white_balance/enabled)"/>
     <param name="white_balance/method"                 value="$(arg white_balance/method)"/>

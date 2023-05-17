@@ -5,6 +5,7 @@ debayer:
 
 flip:
   enabled: false
+  angle: 0
 
 white_balance:
   enabled: true

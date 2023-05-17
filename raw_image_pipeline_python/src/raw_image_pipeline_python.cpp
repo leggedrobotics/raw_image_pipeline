@@ -27,6 +27,7 @@ PYBIND11_MODULE(_py_raw_image_pipeline, m) {
       .def("set_debayer", &RawImagePipeline::setDebayer)
       .def("set_debayer_encoding", &RawImagePipeline::setDebayerEncoding)
       .def("set_flip", &RawImagePipeline::setFlip)
+      .def("set_flip_angle", &RawImagePipeline::setFlipAngle)
       .def("set_white_balance", &RawImagePipeline::setWhiteBalance)
       .def("set_white_balance_method", &RawImagePipeline::setWhiteBalanceMethod)
       .def("set_white_balance_percentile", &RawImagePipeline::setWhiteBalancePercentile)

@@ -67,6 +67,7 @@ class RawImagePipeline {
   void setDebayerEncoding(const std::string& encoding);
 
   void setFlip(bool enabled);
+  void setFlipAngle(int angle);
 
   void setWhiteBalance(bool enabled);
   void setWhiteBalanceMethod(const std::string& method);

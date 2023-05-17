@@ -20,6 +20,11 @@ class FlipModule {
   void enable(bool enabled);
   bool enabled() const;
 
+    //-----------------------------------------------------------------------------
+  // Setters
+  //-----------------------------------------------------------------------------
+  void setAngle(const int& angle);
+
   //-----------------------------------------------------------------------------
   // Getters
   //-----------------------------------------------------------------------------
@@ -57,6 +62,8 @@ class FlipModule {
   bool enabled_;
   bool use_gpu_;
   cv::Mat image_;
+
+  int angle_;
 };
 
 }  // namespace raw_image_pipeline

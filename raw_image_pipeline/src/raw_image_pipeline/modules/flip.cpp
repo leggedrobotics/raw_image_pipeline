@@ -18,6 +18,13 @@ bool FlipModule::enabled() const {
 }
 
 //-----------------------------------------------------------------------------
+// Setters
+//-----------------------------------------------------------------------------
+void FlipModule::setAngle(const int& angle) {
+  angle_ = angle;
+}
+
+//-----------------------------------------------------------------------------
 // Getters
 //-----------------------------------------------------------------------------
 cv::Mat FlipModule::getImage() const {
@@ -28,9 +35,26 @@ cv::Mat FlipModule::getImage() const {
 // Wrapper methods (CPU)
 //-----------------------------------------------------------------------------
 void FlipModule::flip(cv::Mat& image) {
+  // From https://stackoverflow.com/a/42359233
   cv::Mat out;
-  cv::flip(image, out, -1);  // negative numbers flip x and y
-  image = out;
+  if (angle_ == 90) { // clockwise rotation
+    cv::transpose(image, out);
+    cv::flip(out, out, 1);
+    image = out;
+
+  } else if (angle_ == 180) {
+    cv::flip(image, out, -1);  // negative numbers flip x and y
+    image = out;
+
+  } else if (angle_ == 270) { // counter-clockwise rotation
+    cv::transpose(image, out);
+    cv::flip(out, out, 0);
+    image = out;
+
+  } else {
+    // Do nothing
+    
+  }
 }
 
 void FlipModule::saveFlippedImage(cv::Mat& image) {
@@ -43,8 +67,24 @@ void FlipModule::saveFlippedImage(cv::Mat& image) {
 #ifdef HAS_CUDA
 void FlipModule::flip(cv::cuda::GpuMat& image) {
   cv::cuda::GpuMat out;
-  cv::cuda::flip(image, out, -1);  // negative numbers flip x and y
-  image = out;
+
+  if (angle_ == 90) { // clockwise rotation
+    cv::cuda::transpose(image, out);
+    cv::cuda::flip(out, out, 1);
+    image = out;
+
+  } else if (angle_ == 180) {
+    cv::cuda::flip(image, out, -1);  // negative numbers flip x and y
+    image = out;
+ 
+  } else if (angle_ == 270) { // counter-clockwise rotation
+    cv::cuda::transpose(image, out);
+    cv::cuda::flip(out, out, 0);
+    image = out;
+  
+  } else {
+    // Do nothing
+  }
 }
 
 void FlipModule::saveFlippedImage(cv::cuda::GpuMat& image) {
