@@ -97,6 +97,7 @@
     <param name="debayer/encoding"                     value="$(arg debayer_encoding)"/>
 
     <param name="flip/enabled"                         value="$(arg flip/enabled)"/>
+    <param name="flip/angle"                           value="$(arg flip/angle)"/>
     
     <param name="white_balance/enabled"                value="$(arg white_balance/enabled)"/>
     <param name="white_balance/method"                 value="$(arg white_balance/method)"/>

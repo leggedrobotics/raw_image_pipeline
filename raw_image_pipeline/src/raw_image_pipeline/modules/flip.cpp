@@ -40,19 +40,21 @@ void FlipModule::flip(cv::Mat& image) {
   if (angle_ == 90) { // clockwise rotation
     cv::transpose(image, out);
     cv::flip(out, out, 1);
+    image = out;
 
   } else if (angle_ == 180) {
     cv::flip(image, out, -1);  // negative numbers flip x and y
- 
+    image = out;
+
   } else if (angle_ == 270) { // counter-clockwise rotation
     cv::transpose(image, out);
     cv::flip(out, out, 0);
-  
+    image = out;
+
   } else {
     // Do nothing
+    
   }
-
-  image = out;
 }
 
 void FlipModule::saveFlippedImage(cv::Mat& image) {
@@ -69,18 +71,20 @@ void FlipModule::flip(cv::cuda::GpuMat& image) {
   if (angle_ == 90) { // clockwise rotation
     cv::cuda::transpose(image, out);
     cv::cuda::flip(out, out, 1);
+    image = out;
 
   } else if (angle_ == 180) {
     cv::cuda::flip(image, out, -1);  // negative numbers flip x and y
+    image = out;
  
   } else if (angle_ == 270) { // counter-clockwise rotation
     cv::cuda::transpose(image, out);
     cv::cuda::flip(out, out, 0);
+    image = out;
   
   } else {
     // Do nothing
   }
-  image = out;
 }
 
 void FlipModule::saveFlippedImage(cv::cuda::GpuMat& image) {
