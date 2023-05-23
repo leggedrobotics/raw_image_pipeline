@@ -233,7 +233,8 @@ void UndistortionModule::init() {
 
 void UndistortionModule::undistort(cv::Mat& image) {
   cv::Mat out;
-  cv::remap(image, out, undistortion_map_x_, undistortion_map_y_, cv::InterpolationFlags::INTER_LINEAR, cv::BorderTypes::BORDER_CONSTANT, 0);
+  cv::remap(image, out, undistortion_map_x_, undistortion_map_y_, cv::InterpolationFlags::INTER_LINEAR, cv::BorderTypes::BORDER_CONSTANT,
+            0);
   image = out;
 }
 
@@ -244,7 +245,8 @@ void UndistortionModule::saveUndistortedImage(cv::Mat& image) {
 #ifdef HAS_CUDA
 void UndistortionModule::undistort(cv::cuda::GpuMat& image) {
   cv::cuda::GpuMat out;
-  cv::cuda::remap(image, out, gpu_undistortion_map_x_, gpu_undistortion_map_y_, cv::InterpolationFlags::INTER_LINEAR, cv::BORDER_CONSTANT, 0);
+  cv::cuda::remap(image, out, gpu_undistortion_map_x_, gpu_undistortion_map_y_, cv::InterpolationFlags::INTER_LINEAR, cv::BORDER_CONSTANT,
+                  0);
   image = out;
 }
 

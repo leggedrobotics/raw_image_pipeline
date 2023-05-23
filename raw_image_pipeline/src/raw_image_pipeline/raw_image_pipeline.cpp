@@ -21,9 +21,9 @@ RawImagePipeline::RawImagePipeline(bool use_gpu) : use_gpu_(use_gpu), debug_(fal
 }
 
 RawImagePipeline::RawImagePipeline(bool use_gpu, const std::string& params_path, const std::string& calibration_path,
-                             const std::string& color_calibration_path)
+                                   const std::string& color_calibration_path)
     : use_gpu_(use_gpu) {
-    // Load parameters
+  // Load parameters
   if (params_path.empty())
     loadParams(DEFAULT_PARAMS_PATH);
   else
@@ -229,6 +229,10 @@ cv::Mat RawImagePipeline::getDistColorImage() const {
 
 cv::Mat RawImagePipeline::getRectMask() const {
   return undistorter_->getRectMask();
+}
+
+cv::Mat RawImagePipeline::getProcessedImage() const {
+  return image_.clone();
 }
 
 //-----------------------------------------------------------------------------

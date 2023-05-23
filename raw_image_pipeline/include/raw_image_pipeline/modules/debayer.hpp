@@ -35,9 +35,9 @@ class DebayerModule {
   //-----------------------------------------------------------------------------
   template <typename T>
   bool apply(T& image, std::string& encoding) {
-    if (!enabled_) {
-      return false;
-    }
+    // if (!enabled_) {
+    //   return false;
+    // }
     // Check encoding
     std::string input_encoding = encoding_ == "auto" ? encoding : encoding_;
     // Run debayer

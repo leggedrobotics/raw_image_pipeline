@@ -134,6 +134,7 @@ class RawImagePipeline {
   cv::Mat getDistDebayeredImage() const;
   cv::Mat getDistColorImage() const;
   cv::Mat getRectMask() const;
+  cv::Mat getProcessedImage() const;
 
  private:
   //-----------------------------------------------------------------------------
@@ -165,6 +166,14 @@ class RawImagePipeline {
 
     undistorter_->apply(image);
     saveDebugImage(image, "/tmp/07_undistortion.png");
+
+    // Save processed output
+    saveOutput(image);
+  }
+
+  void saveOutput(const cv::Mat& image) {
+    // copy to internal image
+    image.copyTo(image_);
   }
 
   void saveDebugImage(const cv::Mat& image, const std::string& filename) const {
@@ -181,6 +190,11 @@ class RawImagePipeline {
     cv::Mat tmp;
     image.download(tmp);
     saveDebugImage(tmp, filename);
+  }
+
+  void saveOutput(const cv::cuda::GpuMat& image) {
+    // download to internal image
+    image.download(image_);
   }
 #endif
 
@@ -202,6 +216,9 @@ class RawImagePipeline {
   // Pipeline options
   bool use_gpu_;
   bool debug_;
+
+  // Internal variables
+  cv::Mat image_;
 };
 
 }  // namespace raw_image_pipeline
