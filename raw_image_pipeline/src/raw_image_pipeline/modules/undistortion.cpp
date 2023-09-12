@@ -23,6 +23,7 @@ bool UndistortionModule::enabled() const {
 void UndistortionModule::setImageSize(int width, int height) {
   dist_image_size_ = cv::Size(width, height);
   rect_image_size_ = cv::Size(width, height);
+  init();
 }
 
 void UndistortionModule::setNewImageSize(int width, int height) {
@@ -43,26 +44,31 @@ void UndistortionModule::setFovScale(double fov_scale) {
 void UndistortionModule::setCameraMatrix(const std::vector<double>& camera_matrix) {
   dist_camera_matrix_ = cv::Matx33d(camera_matrix.data());
   rect_camera_matrix_ = cv::Matx33d(camera_matrix.data());
+  init();
 }
 
 void UndistortionModule::setDistortionCoefficients(const std::vector<double>& coefficients) {
   dist_distortion_coeff_ = cv::Matx14d(coefficients.data());
   rect_distortion_coeff_ = cv::Matx14d(coefficients.data());
+  init();
 }
 
 void UndistortionModule::setDistortionModel(const std::string& model) {
   dist_distortion_model_ = model;
   rect_distortion_model_ = model;
+  init();
 }
 
 void UndistortionModule::setRectificationMatrix(const std::vector<double>& rectification_matrix) {
   dist_rectification_matrix_ = cv::Matx33d(rectification_matrix.data());
   rect_rectification_matrix_ = cv::Matx33d(rectification_matrix.data());
+  init();
 }
 
 void UndistortionModule::setProjectionMatrix(const std::vector<double>& projection_matrix) {
   dist_projection_matrix_ = cv::Matx34d(projection_matrix.data());
   rect_projection_matrix_ = cv::Matx34d(projection_matrix.data());
+  init();
 }
 
 //-----------------------------------------------------------------------------

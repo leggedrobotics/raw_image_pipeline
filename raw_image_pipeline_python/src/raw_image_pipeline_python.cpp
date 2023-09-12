@@ -5,6 +5,7 @@
 
 #include <cvnp/cvnp.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <raw_image_pipeline/raw_image_pipeline.hpp>
 
 namespace py = pybind11;
@@ -50,11 +51,11 @@ PYBIND11_MODULE(_py_raw_image_pipeline, m) {
       .def("set_undistortion_new_image_size", &RawImagePipeline::setUndistortionNewImageSize)
       .def("set_undistortion_balance", &RawImagePipeline::setUndistortionBalance)
       .def("set_undistortion_fov_scale", &RawImagePipeline::setUndistortionFovScale)
-      .def("set_undistortion_camera_matrix", &RawImagePipeline::setUndistortionDistortionCoefficients)
-      .def("set_undistortion_distortion_coeffs", &RawImagePipeline::setUndistortionDistortionModel)
-      .def("set_undistortion_distortion_model", &RawImagePipeline::setUndistortionRectificationMatrix)
+      .def("set_undistortion_camera_matrix", &RawImagePipeline::setUndistortionCameraMatrix)
+      .def("set_undistortion_distortion_coeffs", &RawImagePipeline::setUndistortionDistortionCoefficients)
+      .def("set_undistortion_distortion_model", &RawImagePipeline::setUndistortionDistortionModel)
+      .def("set_undistortion_rectification_matrix", &RawImagePipeline::setUndistortionRectificationMatrix)
       .def("set_undistortion_projection_matrix", &RawImagePipeline::setUndistortionProjectionMatrix)
-      .def("get_dist_image_height", &RawImagePipeline::getDistImageHeight)
       .def("get_dist_image_height", &RawImagePipeline::getDistImageHeight)
       .def("get_dist_image_width", &RawImagePipeline::getDistImageWidth)
       .def("get_dist_distortion_model", &RawImagePipeline::getDistDistortionModel)
@@ -62,7 +63,6 @@ PYBIND11_MODULE(_py_raw_image_pipeline, m) {
       .def("get_dist_distortion_coefficients", &RawImagePipeline::getDistDistortionCoefficients)
       .def("get_dist_rectification_matrix", &RawImagePipeline::getDistRectificationMatrix)
       .def("get_dist_projection_matrix", &RawImagePipeline::getDistProjectionMatrix)
-      .def("get_rect_image_height", &RawImagePipeline::getRectImageHeight)
       .def("get_rect_image_height", &RawImagePipeline::getRectImageHeight)
       .def("get_rect_image_width", &RawImagePipeline::getRectImageWidth)
       .def("get_rect_distortion_model", &RawImagePipeline::getRectDistortionModel)
