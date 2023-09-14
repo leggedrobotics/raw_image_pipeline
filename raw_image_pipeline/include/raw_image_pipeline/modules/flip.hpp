@@ -8,6 +8,7 @@
 #include <opencv2/opencv.hpp>
 
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
 #include <opencv2/core/cuda.hpp>
 #include <opencv2/cudaimgproc.hpp>
 #endif
@@ -52,6 +53,7 @@ class FlipModule {
   void saveFlippedImage(cv::Mat& image);
 
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
   void flip(cv::cuda::GpuMat& image);
   void saveFlippedImage(cv::cuda::GpuMat& image);
 #endif
