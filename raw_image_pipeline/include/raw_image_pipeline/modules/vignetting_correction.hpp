@@ -8,6 +8,7 @@
 #include <opencv2/opencv.hpp>
 
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
 #include <opencv2/core/cuda.hpp>
 #include <opencv2/cudaimgproc.hpp>
 #endif
@@ -45,6 +46,7 @@ class VignettingCorrectionModule {
  private:
   void correct(cv::Mat& image);
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
   void correct(cv::cuda::GpuMat& image);
 #endif
 
@@ -60,6 +62,7 @@ class VignettingCorrectionModule {
   cv::Mat vignetting_mask_f_;
   cv::Mat image_f_;
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
   cv::cuda::GpuMat gpu_vignetting_mask_f_;
   cv::cuda::GpuMat gpu_image_f_;
 #endif

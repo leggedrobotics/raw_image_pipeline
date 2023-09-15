@@ -11,6 +11,7 @@
 #include <opencv2/opencv.hpp>
 
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
 #include <npp.h>
 #include <opencv2/core/cuda.hpp>
 #include <opencv2/cudaimgproc.hpp>
@@ -66,6 +67,7 @@ class ColorCalibrationModule {
 
   void colorCorrection(cv::Mat& image);
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
   void colorCorrection(cv::cuda::GpuMat& image);
 #endif
 
@@ -81,6 +83,7 @@ class ColorCalibrationModule {
   cv::Scalar color_calibration_bias_;
 
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
   Npp32f gpu_color_calibration_matrix_[3][4] = {{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}};
 #endif
 };
