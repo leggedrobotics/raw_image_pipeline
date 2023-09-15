@@ -205,10 +205,11 @@ void RawImagePipelineRos::setupRos() {
   if (input_type_ == "color") {
     pub_image_debayered_ = image_transport_.advertiseCamera(output_prefix_ + "/debayered/image", ros_queue_size);
     pub_image_debayered_slow_ = image_transport_.advertise(output_prefix_ + "/debayered/slow", ros_queue_size);
-
-    pub_image_color_ = image_transport_.advertiseCamera(output_prefix_ + "/color/image", ros_queue_size);
-    pub_image_color_slow_ = image_transport_.advertise(output_prefix_ + "/color/slow", ros_queue_size);
   }
+
+  // Default publisher
+  pub_image_color_ = image_transport_.advertiseCamera(output_prefix_ + "/" + input_type_ + "/image", ros_queue_size);
+  pub_image_color_slow_ = image_transport_.advertise(output_prefix_ + "/" + input_type_ + "/image/slow", ros_queue_size);
 
   // Setup service calls
   reset_wb_temporal_consistency_server_ =
@@ -265,21 +266,22 @@ void RawImagePipelineRos::imageCallback(const sensor_msgs::ImageConstPtr& image_
                       pub_image_debayered_, pub_image_debayered_slow_,  // Publishers
                       skipped_images_for_slow_topic_                    // Counter to keep track of the skipped images
     );
-
-    // Publish color image
-    cv_ptr_processed->image = raw_image_pipeline_->getDistColorImage();
-    publishColorImage(cv_ptr_processed,                                                                     // Processed
-                      image_msg,                                                                            // Original image
-                      cv::Mat(),                                                                            // Mask
-                      raw_image_pipeline_->getDistImageHeight(), raw_image_pipeline_->getDistImageWidth(),  // Dimensions
-                      raw_image_pipeline_->getDistDistortionModel(),
-                      raw_image_pipeline_->getDistDistortionCoefficients(),  // Distortion stuff
-                      raw_image_pipeline_->getDistCameraMatrix(), raw_image_pipeline_->getDistRectificationMatrix(),
-                      raw_image_pipeline_->getDistProjectionMatrix(),  // Pinhole stuff
-                      pub_image_color_, pub_image_color_slow_,         // Publishers
-                      skipped_images_for_slow_topic_                   // Counter to keep track of the skipped images
-    );
   }
+
+  // Publish default image
+  // cv_ptr_processed->image = raw_image_pipeline_->getDistColorImage();
+  cv_ptr_processed->image = raw_image_pipeline_->getProcessedImage();
+  publishColorImage(cv_ptr_processed,                                                                     // Processed
+                    image_msg,                                                                            // Original image
+                    cv::Mat(),                                                                            // Mask
+                    raw_image_pipeline_->getDistImageHeight(), raw_image_pipeline_->getDistImageWidth(),  // Dimensions
+                    raw_image_pipeline_->getDistDistortionModel(),
+                    raw_image_pipeline_->getDistDistortionCoefficients(),  // Distortion stuff
+                    raw_image_pipeline_->getDistCameraMatrix(), raw_image_pipeline_->getDistRectificationMatrix(),
+                    raw_image_pipeline_->getDistProjectionMatrix(),  // Pinhole stuff
+                    pub_image_color_, pub_image_color_slow_,         // Publishers
+                    skipped_images_for_slow_topic_                   // Counter to keep track of the skipped images
+  );
 }
 
 bool RawImagePipelineRos::resetWhiteBalanceHandler(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res) {
@@ -318,9 +320,9 @@ void RawImagePipelineRos::publishColorImage(const cv_bridge::CvImagePtr& cv_ptr_
       color_img_msg->encoding = sensor_msgs::image_encodings::RGB8;
     else if (output_encoding_ == "BGR")
       color_img_msg->encoding = sensor_msgs::image_encodings::BGR8;
-    else
-      ROS_ERROR_STREAM("Found invalid image encoding: " << output_encoding_
-                                                        << ", make sure to set a supported ouput encoding (either 'RGB' or 'BGR')");
+    else if (output_encoding_ != "passthrough")
+      ROS_ERROR_STREAM("Found invalid image encoding: "
+                       << output_encoding_ << ", make sure to set a supported ouput encoding ('RGB', 'BGR', or 'passthrough')");
   }
 
   sensor_msgs::CameraInfoPtr color_camera_info_msg(new sensor_msgs::CameraInfo());
