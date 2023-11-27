@@ -252,7 +252,7 @@ void RawImagePipelineRos::imageCallback(const sensor_msgs::ImageConstPtr& image_
     );
   }
 
-  if (input_type_ == "color") {
+  if (input_type_ == "color" && raw_image_pipeline_->isDebayerEnabled()) {
     // Publish debayered image
     cv_ptr_processed->image = raw_image_pipeline_->getDistDebayeredImage();
     publishColorImage(cv_ptr_processed,                                                                     // Processed
@@ -268,9 +268,12 @@ void RawImagePipelineRos::imageCallback(const sensor_msgs::ImageConstPtr& image_
     );
   }
 
-  // Publish default image
-  // cv_ptr_processed->image = raw_image_pipeline_->getDistColorImage();
-  cv_ptr_processed->image = raw_image_pipeline_->getProcessedImage();
+  // Publish color image
+  if (raw_image_pipeline_->isUndistortionEnabled()) {
+    cv_ptr_processed->image = raw_image_pipeline_->getDistColorImage();
+  } else {
+    cv_ptr_processed->image = raw_image_pipeline_->getProcessedImage();
+  }
   publishColorImage(cv_ptr_processed,                                                                     // Processed
                     image_msg,                                                                            // Original image
                     cv::Mat(),                                                                            // Mask
