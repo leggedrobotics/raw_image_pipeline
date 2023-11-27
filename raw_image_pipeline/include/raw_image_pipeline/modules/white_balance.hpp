@@ -16,6 +16,7 @@
 #include <memory>
 
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
 #include <opencv2/core/cuda.hpp>
 #include <opencv2/cudaimgproc.hpp>
 #include <opencv2/cudawarping.hpp>
@@ -98,6 +99,7 @@ class WhiteBalanceModule {
 // White balance wrapper methods (GPU)
 //-----------------------------------------------------------------------------
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
   void balanceWhiteSimple(cv::cuda::GpuMat& image);
   void balanceWhiteGreyWorld(cv::cuda::GpuMat& image);
   void balanceWhiteLearned(cv::cuda::GpuMat& image);

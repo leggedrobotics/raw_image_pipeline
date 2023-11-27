@@ -8,6 +8,7 @@
 #include <opencv2/opencv.hpp>
 
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
 #include <opencv2/core/cuda.hpp>
 #include <opencv2/cudaimgproc.hpp>
 #endif
@@ -48,6 +49,7 @@ class ColorEnhancerModule {
  private:
   void enhance(cv::Mat& image);
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
   void enhance(cv::cuda::GpuMat& image);
 #endif
 

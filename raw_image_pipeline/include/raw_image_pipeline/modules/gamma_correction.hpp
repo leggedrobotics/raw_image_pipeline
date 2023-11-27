@@ -8,6 +8,7 @@
 #include <opencv2/opencv.hpp>
 
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
 #include <opencv2/core/cuda.hpp>
 #include <opencv2/cudaimgproc.hpp>
 #endif
@@ -52,6 +53,7 @@ class GammaCorrectionModule {
   // Wrapper methods (GPU)
   //-----------------------------------------------------------------------------
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
   void gammaCorrectCustom(cv::cuda::GpuMat& image);
   void gammaCorrectDefault(cv::cuda::GpuMat& image);
 #endif
@@ -75,6 +77,7 @@ class GammaCorrectionModule {
   cv::Mat cpu_lut_;
 
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
   cv::Ptr<cv::cuda::LookUpTable> gpu_lut_;
 #endif
 };

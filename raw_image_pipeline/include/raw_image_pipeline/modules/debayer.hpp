@@ -8,6 +8,7 @@
 #include <opencv2/opencv.hpp>
 
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
 #include <opencv2/core/cuda.hpp>
 #include <opencv2/cudaimgproc.hpp>
 #endif
@@ -56,6 +57,7 @@ class DebayerModule {
   void saveDebayeredImage(cv::Mat& image);
 
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
   void debayer(cv::cuda::GpuMat& image, std::string& encoding);
   void saveDebayeredImage(cv::cuda::GpuMat& image);
 #endif

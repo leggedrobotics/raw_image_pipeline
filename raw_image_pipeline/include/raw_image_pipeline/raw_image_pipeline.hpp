@@ -10,6 +10,7 @@
 #include <opencv2/xphoto.hpp>
 
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
 #include <opencv2/core/cuda.hpp>
 #include <opencv2/cudaimgproc.hpp>
 #include <opencv2/cudawarping.hpp>
@@ -186,6 +187,7 @@ class RawImagePipeline {
   }
 
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
   void saveDebugImage(const cv::cuda::GpuMat& image, const std::string& filename) const {
     cv::Mat tmp;
     image.download(tmp);

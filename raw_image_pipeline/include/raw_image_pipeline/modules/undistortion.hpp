@@ -11,6 +11,7 @@
 #include <opencv2/opencv.hpp>
 
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
 #include <opencv2/core/cuda.hpp>
 #include <opencv2/cudaimgproc.hpp>
 #include <opencv2/cudawarping.hpp>
@@ -91,6 +92,7 @@ class UndistortionModule {
   void saveUndistortedImage(cv::Mat& image);
 
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
   void undistort(cv::cuda::GpuMat& image);
   void saveUndistortedImage(cv::cuda::GpuMat& image);
 #endif
@@ -127,6 +129,7 @@ class UndistortionModule {
   cv::Mat undistortion_map_y_;
 
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
   cv::cuda::GpuMat gpu_undistortion_map_x_;
   cv::cuda::GpuMat gpu_undistortion_map_y_;
 #endif

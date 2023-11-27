@@ -23,6 +23,7 @@ inspired by Jonathan Barron's "Fast Fourier Color Constancy", CVPR, 2017
 #include <opencv2/opencv.hpp>
 
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
 #include <opencv2/core/cuda.hpp>
 #include <opencv2/cudaarithm.hpp>
 #endif
@@ -47,6 +48,7 @@ class ConvolutionalColorConstancyWB {
 
   Model<cv::Mat> model_;
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
   Model<cv::cuda::GpuMat> gpu_model_;
 #endif
 
@@ -106,6 +108,7 @@ class ConvolutionalColorConstancyWB {
 
 // Compute and apply RGB gains
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
   int computeResponseCuda();
   void applyGainsCuda(cv::cuda::GpuMat& image);
 #endif
@@ -117,6 +120,7 @@ class ConvolutionalColorConstancyWB {
 
 // Applies white balance
 #ifdef HAS_CUDA
+#include <opencv2/cudaarithm.hpp>
   void balanceWhite(const cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst);
 #endif
   void balanceWhite(const cv::Mat& src, cv::Mat& dst);
